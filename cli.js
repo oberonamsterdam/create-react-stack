@@ -29,7 +29,7 @@ export const log = (message, type = 'log') => console[type](chalk`{bold.green cr
         process.exit(1);
     }
     
-    let appname = program.args[0];
+    const appname = program.args[0];
     let questionsArray = Object.values(questions).map(({ question }) => question);
     
     if(!appname) {

@@ -1,22 +1,24 @@
 {
-  "name": "create-oberon-app",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "babel-plugin-transform-object-rest-spread": "^6.23.0",
-    "babel-preset-env": "^1.6.0",
-    "babel-register": "^6.24.1",
-    "chalk": "^2.0.1",
-    "commander": "^2.11.0",
-    "es6-promisify": "^5.0.0",
-    "inquirer": "^3.2.0",
-    "node-cmd": "^3.0.0"
-  }
+    "name": "create-oberon-app",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "bin": "index.js",
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "babel-plugin-transform-object-rest-spread": "^6.23.0",
+        "babel-preset-env": "^1.6.0",
+        "babel-register": "^6.24.1",
+        "chalk": "^2.0.1",
+        "commander": "^2.11.0",
+        "es6-promisify": "^5.0.0",
+        "inquirer": "^3.2.0",
+        "node-cmd": "^3.0.0",
+        "replace-in-file": "^2.5.3"
+    }
 }

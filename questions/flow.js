@@ -20,11 +20,11 @@ export const execute = async (answer, { appname }) => {
         try {
             await get('which flow');
         } catch(ex) {
+            // throw an error but with a bit more of an userfriendly message
             throw new Error('Could not find flow executable (did you run \'npm install -g flow-bin\'?');
         }
+        await run('flow init', {
+            cwd: path.join(process.cwd(), appname)
+        })
     }
-    
-    await run('flow init', {
-        cwd: path.join(process.cwd() + '/' + appname)
-    })
 };
