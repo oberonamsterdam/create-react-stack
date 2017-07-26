@@ -1,4 +1,3 @@
-// import { log } from '../cli';
 import promisify from 'es6-promisify';
 
 export default {

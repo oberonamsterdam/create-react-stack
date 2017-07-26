@@ -6,13 +6,13 @@ import { execute } from './questions';
 import inquirer from 'inquirer';
 import program from 'commander';
 import cmd from 'node-cmd';
+import log from './services/log';
+import { postInstall } from './questions/index';
 
 const get = promisify(cmd.get, {
     thisArg: cmd,
     multiArgs: true
 });
-
-export const log = (message, type = 'log') => console[type](chalk`{bold.green create-oberon-app} ${type === 'error' ? chalk`{bold.red ERR!}` : chalk`{bold.cyan INFO}`}`, message);
 
 (async () => {
     log(chalk`{blue v${_package.version}}`);
@@ -55,6 +55,14 @@ Please specify a name now:`,
     for(const key of Object.keys(questions)) {
         const question = questions[key];
         await question.execute(answers[key], answers);
+    }
+    
+    // todo do npm install here
+    
+    for(const key of Object.keys(questions)) {
+        if(key in postInstall) {
+            await postInstall[key](answers[key], answers);
+        }
     }
 })().catch(err => {
     log(err, 'error');

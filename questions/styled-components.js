@@ -3,7 +3,7 @@ import path from 'path';
 
 export default {
     type: 'confirm',
-    name: 'ssr',
+    name: 'styledComponents',
     message: 'Use styled-components? (http://styled-components.com)',
 };
 

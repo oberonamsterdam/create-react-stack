@@ -17,8 +17,12 @@
         "chalk": "^2.0.1",
         "commander": "^2.11.0",
         "es6-promisify": "^5.0.0",
+        "eslint-config-oberon": "^1.0.3",
         "inquirer": "^3.2.0",
         "node-cmd": "^3.0.0",
         "replace-in-file": "^2.5.3"
+    },
+    "devDependencies": {
+        "eslint": "^4.3.0"
     }
 }
