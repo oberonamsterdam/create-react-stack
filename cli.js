@@ -2,12 +2,13 @@ import promisify from 'es6-promisify';
 import chalk from 'chalk';
 import _package from './package.json';
 import questions from './questions';
-import { execute } from './questions';
 import inquirer from 'inquirer';
 import program from 'commander';
 import cmd from 'node-cmd';
 import log from './services/log';
 import { postInstall } from './questions/index';
+import run from './services/run';
+import path from 'path';
 
 const get = promisify(cmd.get, {
     thisArg: cmd,
@@ -44,7 +45,8 @@ Please specify a name now:`,
             ...questionsArray
         ];
     }
-    
+
+    log('📋  Please enter your order:');
     const answers = await inquirer.prompt(questionsArray);
     if(!answers.appname) {
         answers.appname = appname;
@@ -52,18 +54,42 @@ Please specify a name now:`,
     
     log(chalk`🍳  Cooking up a fresh new app...`);
     
+    let packages = [], devPackages = [];
     for(const key of Object.keys(questions)) {
         const question = questions[key];
-        await question.execute(answers[key], answers);
+        await question.execute(answers[key], answers, packages, devPackages);
     }
     
-    // todo do npm install here
-    
+    if(packages.length) {
+        console.log();
+        console.log(chalk`Installing {bold.blue packages}:`);
+        for(const pkg of packages) {
+            console.log(chalk`    - {blue ${pkg}}`);
+        }
+        
+        await run(`npm install ${packages.join(' ')}`, {
+            cwd: path.join(process.cwd(), answers.appname)
+        });
+    }
+    if(devPackages.length) {
+        console.log();
+        console.log(chalk`Installing {bold.green dev packages}:`);
+        for(const pkg of devPackages) {
+            console.log(chalk`    - {green ${pkg}}`);
+        }
+        await run(`npm install ${devPackages.join(' ')} --save-dev`, {
+            cwd: path.join(process.cwd(), answers.appname)
+        });
+    }
+
     for(const key of Object.keys(questions)) {
         if(key in postInstall) {
             await postInstall[key](answers[key], answers);
         }
     }
+
+    log('🔥  All done! Your app is ready to use.');
+    log(chalk`Feel free to {blue cd ${answers.appname}} and {blue npm start}!`);
 })().catch(err => {
     log(err, 'error');
     process.exit(1);

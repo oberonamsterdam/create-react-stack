@@ -13,7 +13,7 @@ export default (message, type = 'log', ...misc) => {
             content = [...content, chalk`{bold.red ERR!}`];
             break;
         case 'warn':
-            content = [...content, chalk`{bold.red WARN}`];
+            content = [...content, chalk`{bold.yellow WARN}`];
             break;
         case 'debug':
             content = [...content, chalk`{bold.magenta VERB}`];

@@ -1,5 +1,3 @@
-import promisify from 'es6-promisify';
-
 export default {
     type: 'confirm',
     name: 'redux',

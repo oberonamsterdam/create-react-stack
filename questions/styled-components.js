@@ -1,16 +1,11 @@
-import run from '../services/run';
-import path from 'path';
-
 export default {
     type: 'confirm',
     name: 'styledComponents',
     message: 'Use styled-components? (http://styled-components.com)',
 };
 
-export const execute = async (answer, { appname }) => {
+export const execute = async (answer, _, packages) => {
     if(answer) {
-        await run('npm install styled-components', {
-            cwd: path.join(process.cwd(), appname)
-        });
+        packages.push('styled-components');
     }
 };
