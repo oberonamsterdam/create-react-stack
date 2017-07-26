@@ -13,30 +13,30 @@ export default {
 };
 
 export const execute = async (ssr, { appname }) => {
-    // await run(`npx ${ssr ? 'create-razzle-app' : 'create-react-app'} ${appname}`);
-    //
-    // // move components into separate components dir.
-    // const src = path.join(process.cwd(), appname, 'src');
-    // const components = path.join(src, 'components');
-    // let files = ['App.js', 'App.test.js', 'App.css'];
-    //
-    // if(ssr) {
-    //     files = [...files, 'Home.js', 'Home.css', 'react.svg'];
-    // } else {
-    //     files = [...files, 'logo.svg'];
-    // }
-    //
-    // await mkdir(components);
-    //
-    // const promises = [];
-    // for(const file of files) {
-    //     promises.push(mv(path.join(src, file), path.join(components, file)));
-    // }
-    // await Promise.all(promises);
-    //
-    // await replace({
-    //     files: ssr ? [path.join(src, 'client.js'), path.join(src, 'server.js')] : path.join(src, 'index.js'),
-    //     from: /import App from '\.\/App';/g,
-    //     to: 'import App from \'./components/App\''
-    // });
+    await run(`npx ${ssr ? 'create-razzle-app' : 'create-react-app'} ${appname}`);
+
+    // move components into separate components dir.
+    const src = path.join(process.cwd(), appname, 'src');
+    const components = path.join(src, 'components');
+    let files = ['App.js', 'App.test.js', 'App.css'];
+
+    if(ssr) {
+        files = [...files, 'Home.js', 'Home.css', 'react.svg'];
+    } else {
+        files = [...files, 'logo.svg'];
+    }
+
+    await mkdir(components);
+
+    const promises = [];
+    for(const file of files) {
+        promises.push(mv(path.join(src, file), path.join(components, file)));
+    }
+    await Promise.all(promises);
+
+    await replace({
+        files: ssr ? [path.join(src, 'client.js'), path.join(src, 'server.js')] : path.join(src, 'index.js'),
+        from: /import App from '\.\/App';/g,
+        to: 'import App from \'./components/App\''
+    });
 };
