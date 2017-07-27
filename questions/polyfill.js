@@ -19,6 +19,7 @@ export const execute = async (answer, { ssr, appname, eslint, eslintConfig }, pa
         if(ssr) {
             if(!eslint) {
                 // no eslint, razzle mod still needs to be added
+                packages.push('oberon-razzle-modifications');
                 await addRazzleMod(appname);
             }
             await replace({

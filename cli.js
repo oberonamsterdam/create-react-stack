@@ -66,6 +66,7 @@ Please specify a name now:`,
         for(const pkg of packages) {
             console.log(chalk`    - {blue ${pkg}}`);
         }
+        console.log();
         
         await run(`npm install ${packages.join(' ')}`, {
             cwd: path.join(process.cwd(), answers.appname)
@@ -77,6 +78,8 @@ Please specify a name now:`,
         for(const pkg of devPackages) {
             console.log(chalk`    - {green ${pkg}}`);
         }
+        console.log();
+        
         await run(`npm install ${devPackages.join(' ')} --save-dev`, {
             cwd: path.join(process.cwd(), answers.appname)
         });

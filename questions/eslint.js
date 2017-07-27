@@ -11,9 +11,10 @@ export default {
     when: answers => !!answers.ssr
 };
 
-export const execute = async (answer, { ssr, appname }, _, devPackages) => {
+export const execute = async (answer, { appname }, packages, devPackages) => {
     if(answer) {
         devPackages.push('eslint', 'eslint-loader');
+        packages.push('oberon-razzle-modifications');
         await addRazzleMod(appname);
         await replace({
             from: /const useESLint = false;/,
