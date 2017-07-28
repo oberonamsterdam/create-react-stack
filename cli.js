@@ -92,7 +92,7 @@ Please specify a name now:`,
         }
         console.log();
         
-        await run(`${useYarn ? 'yarn' : 'npm'} install ${devPackages.join(' ')} --save-dev`, {
+        await run(`${useYarn ? 'yarn add' : 'npm install'} ${devPackages.join(' ')} --${useYarn ? 'dev' : 'save-dev'}`, {
             cwd: path.join(process.cwd(), answers.appname)
         });
     }
