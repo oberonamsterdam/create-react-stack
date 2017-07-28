@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 import promisify from 'es6-promisify';
 import chalk from 'chalk';
 import _package from './package.json';
@@ -22,6 +24,16 @@ const get = promisify(cmd.get, {
         .arguments('<appname>')
         .version(_package.version)
         .parse(process.argv);
+
+    let useYarn = false;
+    try {
+        await get('which yarn');
+        useYarn = true;
+        // I wish there was a way to force create-react-app / create-razzle-app to not use yarn...
+        log(chalk`{bold Using yarn!} If you wish to use npm instead, you will have to remove yarn: {dim npm remove yarn -g}`, 'warn');
+    } catch(ex) {
+        //eslint disable-line no-empty
+    }
     
     try {
         await get('which npx');
@@ -80,7 +92,7 @@ Please specify a name now:`,
         }
         console.log();
         
-        await run(`npm install ${devPackages.join(' ')} --save-dev`, {
+        await run(`${useYarn ? 'yarn' : 'npm'} install ${devPackages.join(' ')} --save-dev`, {
             cwd: path.join(process.cwd(), answers.appname)
         });
     }

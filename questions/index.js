@@ -5,6 +5,7 @@ import eslint, { execute as executeEslint } from './eslint';
 import styledComponents, { execute as executeStyledComponents } from './styled-components';
 import eslintConfig, { execute as executeEslintConfig, postInstall as eslintPostInstall } from './eslint-config';
 import polyfill, { execute as executePolyfill } from './polyfill';
+import reduxPersist, { execute as executeReduxPersist } from './redux-persist';
 
 export default {
     ssr: {
@@ -18,6 +19,10 @@ export default {
     redux: {
         question: redux,
         execute: executeRedux
+    },
+    reduxPersist: {
+        question: reduxPersist,
+        execute: executeReduxPersist
     },
     eslint: {
         question: eslint,

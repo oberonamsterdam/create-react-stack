@@ -50,7 +50,7 @@ export const execute = async (answer, { ssr, appname }, _, devPackages) => {
 };
 
 export const postInstall = async (answer, { appname, ssr, eslint }) => {
-    if(ssr && !eslint || !ssr && !answer) {
+    if(ssr && !eslint) {
         return;
     }
     
