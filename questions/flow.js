@@ -27,7 +27,7 @@ export const postInstall = async (answer, { appname }) => {
     const { flowTyped } = await inquirer.prompt([{
         type: 'confirm',
         name: 'flowTyped',
-        message: chalk`{bold Run {dim flow-typed} now? (will automatically type all your dependencies that don't use flow already)}`
+        message: chalk`{bold Run {dim flow-typed} now? (will automatically type all your dependencies)}`
     }]);
     
     if(flowTyped) {

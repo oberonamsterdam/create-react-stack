@@ -3,50 +3,56 @@ import path from 'path';
 import run from '../services/run';
 import replace from 'replace-in-file';
 import fs from 'fs';
-import promisify from 'es6-promisify';
 import log from '../services/log';
+import promisify from 'es6-promisify';
+import cmd from 'node-cmd';
+
 const writeFile = promisify(fs.writeFile);
+const get = promisify(cmd.get, {
+    thisArg: cmd,
+    multiArgs: true
+});
 
 export default {
-    type: 'confirm',
+    // standard does not support flow, so react-app is probably a more suitable choice
+    default: ({ ssr, flow }) => ssr && !flow ? 'standard-react' : 'react-app',
     name: 'eslintConfig',
-    message: chalk`{bold Use {dim eslint-config-oberon}? (https://github.com/oberonamsterdam/eslint-config-oberon)}`,
-    when: answers => (answers.ssr && answers.eslint) || !answers.ssr
+    message: chalk`{bold What ESLint config should to be used? Enter the eslint-config-{cyan name}}`,
+    when: answers => (answers.ssr && answers.eslint) || !answers.ssr,
+    validate: async(answer) => {
+        const packageName = 'eslint-config-' + answer;
+        const res = await get(`npm s ${packageName} --json`);
+        const results = JSON.parse(res[0]).filter(result => result.name === packageName);
+        return results.length ? true : `${packageName} was not found on the npm registry.`;
+    }
 };
 
 export const execute = async (answer, { ssr, appname }, _, devPackages) => {
-    if (answer && !ssr) {
-        devPackages.push('eslint-config-oberon');
+    if(answer !== 'react-app' && !ssr || ssr) {
+        devPackages.push(`eslint-config-${answer}`);
+        const res = await get(`npm info "eslint-config-${answer}@latest" peerDependencies --json`);
+        const peerDeps = JSON.parse(res[0]);
+        devPackages.push(...Object.keys(peerDeps).map(key => `${key}@${peerDeps[key]}`));
+    }
+    
+    if (answer !== 'react-app' && !ssr) {
         // eject if we're on create-react-app.
-        log(chalk`You indicated that you wanted to use {dim eslint-config-oberon}. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
+        log(chalk`You indicated a different config than {dim react-app}. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
         await run('npm run eject', {
             cwd: path.join(process.cwd(), appname)
         });
         await replace({
             files: path.join(process.cwd(), appname, 'package.json'),
             from: /"extends": "react-app"/g,
-            to: '"extends": "oberon"'
+            to: `"extends": "${answer}"`
         });
     }
     
-    if(answer) {
-        // eslint-config-oberon requires babel-eslint to be installed, eslint-config-standard doesn't
-        devPackages.push('babel-eslint');
-    }
-    
-    if(ssr) {
-        devPackages.push(`eslint-config-${answer ? 'oberon' : 'standard'}`);
-        
-        if(!answer) {
-            devPackages.push('eslint-plugin-standard', 'eslint-plugin-promise', 'eslint-plugin-import', 'eslint-plugin-node');
-        }
-        
-        await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
+    await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
 {
-    "extends": "${answer ? 'oberon' : 'standard'}"
+    "extends": "${answer}"
 }
 `);
-    }
 };
 
 export const postInstall = async (answer, { appname, ssr, eslint }) => {

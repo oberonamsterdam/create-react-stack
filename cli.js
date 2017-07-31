@@ -30,7 +30,7 @@ const get = promisify(cmd.get, {
         await get('which yarn');
         useYarn = true;
         // I wish there was a way to force create-react-app / create-razzle-app to not use yarn...
-        log(chalk`{bold Using yarn!} If you wish to use npm instead, you will have to remove yarn: {dim npm remove yarn -g}`, 'warn');
+        log(chalk`{bold Using yarn!} If you wish to use npm instead, you will have to remove yarn: {dim npm remove yarn -g} (if you installed it with npm)`, 'warn');
     } catch(ex) {
         //eslint disable-line no-empty
     }
