@@ -1,5 +1,5 @@
 import ssr, { execute as executeSSR } from './ssr';
-import flow, { execute as executeFlow } from './flow';
+import flow, { execute as executeFlow, postInstall as flowPostInstall } from './flow';
 import redux, { execute as executeRedux } from './redux';
 import eslint, { execute as executeEslint } from './eslint';
 import styledComponents, { execute as executeStyledComponents } from './styled-components';
@@ -43,5 +43,6 @@ export default {
 };
 
 export const postInstall = {
-    eslint: eslintPostInstall
+    eslint: eslintPostInstall,
+    flow: flowPostInstall
 };

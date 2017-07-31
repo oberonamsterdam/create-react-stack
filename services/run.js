@@ -11,7 +11,7 @@ export default (command, options = {}) => {
     log('services/run', 'debug', command, options);
     return new Promise((resolve, reject) => {
         const child = cp.spawn(cmd, args, {
-            stdio: "inherit",
+            stdio: 'inherit',
             shell: true,
             ...options
         });
@@ -23,5 +23,5 @@ export default (command, options = {}) => {
                 resolve();
             }
         });
-    })
-} 
+    });
+};

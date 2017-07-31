@@ -79,8 +79,8 @@ Please specify a name now:`,
             console.log(chalk`    - {blue ${pkg}}`);
         }
         console.log();
-        
-        await run(`npm install ${packages.join(' ')}`, {
+
+        await run(`${useYarn ? 'yarn add' : 'npm install'} ${packages.join(' ')} --${useYarn ? 'dev' : 'save-dev'}`, {
             cwd: path.join(process.cwd(), answers.appname)
         });
     }
@@ -96,6 +96,8 @@ Please specify a name now:`,
             cwd: path.join(process.cwd(), answers.appname)
         });
     }
+
+    log('🚚  All packages installed.');
 
     for(const key of Object.keys(questions)) {
         if(key in postInstall) {

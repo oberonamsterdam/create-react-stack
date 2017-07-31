@@ -1,6 +1,5 @@
 import path from 'path';
 import replace from 'replace-in-file';
-import log from '../services/log';
 import fs from 'fs-extra';
 
 export default {

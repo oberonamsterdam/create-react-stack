@@ -1,12 +1,7 @@
-import promisify from 'es6-promisify';
-import cmd from 'node-cmd';
 import run from '../services/run';
 import path from 'path';
-
-const get = promisify(cmd.get, {
-    thisArg: cmd,
-    multiArgs: true
-});
+import inquirer from 'inquirer';
+import chalk from 'chalk';
 
 export default {
     type: 'confirm',
@@ -14,17 +9,30 @@ export default {
     message: 'Use flow? (http://flow.org)',
 };
 
-export const execute = async (answer, { appname }) => {
+export const execute = async (answer, answers, packages, devPackages) => {
     if(answer) {
-        // we're gonna use flow, so check if flow is actually installed...
-        try {
-            await get('which flow');
-        } catch(ex) {
-            // throw an error but with a bit more of an userfriendly message
-            throw new Error('Could not find global flow executable (did you run \'npm install -g flow-bin\'?', ex);
-        }
-        await run('flow init', {
+        devPackages.push('flow-bin');
+    }
+};
+
+export const postInstall = async (answer, { appname }) => {
+    if(!answer) {
+        return;
+    }
+
+    await run('npx flow init', {
+        cwd: path.join(process.cwd(), appname)
+    });
+
+    const { flowTyped } = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'flowTyped',
+        message: chalk`{bold Run {dim flow-typed} now? (will automatically type all your dependencies that don't use flow already)}`
+    }]);
+    
+    if(flowTyped) {
+        await run('npx flow-typed install', {
             cwd: path.join(process.cwd(), appname)
         });
     }
-};
+}
