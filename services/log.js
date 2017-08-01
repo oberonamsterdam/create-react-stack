@@ -4,7 +4,7 @@ export default (message, type = 'log', ...misc) => {
     if(type === 'debug' && !process.env.DEBUG) {
         return;
     }
-    let content = [chalk`{bold.green create-oberon-app}`];
+    let content = [chalk`{bold.green create-react-stack}`];
     switch(type) {
         case 'log':
             content = [...content, chalk`{bold.cyan INFO}`];

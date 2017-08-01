@@ -2,6 +2,9 @@ import run from '../services/run';
 import path from 'path';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
+import promisify from 'es6-promisify';
+import fs from 'fs';
+const rm = promisify(fs.unlink);
 
 export default {
     type: 'confirm',
@@ -15,14 +18,22 @@ export const execute = async (answer, answers, packages, devPackages) => {
     }
 };
 
-export const postInstall = async (answer, { appname }) => {
+export const postInstall = async (answer, { appname, mobile }) => {
     if(!answer) {
+        if(mobile) {
+            // react native includes a .flowconfig by default, so we'll delete it. 
+            // (kind of makes no sense to do so but hey, consistency.)
+            await rm(path.join(process.cwd(), appname, '.flowconfig'));
+        }
+        
         return;
     }
-
-    await run('npx flow init', {
-        cwd: path.join(process.cwd(), appname)
-    });
+    
+    if(!mobile) {
+        await run('npx flow init', {
+            cwd: path.join(process.cwd(), appname)
+        });
+    }
 
     const { flowTyped } = await inquirer.prompt([{
         type: 'confirm',

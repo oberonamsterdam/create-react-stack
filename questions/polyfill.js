@@ -12,6 +12,7 @@ export default {
     type: 'confirm',
     name: 'polyfill',
     message: 'Use babel-polyfill? (adds IE support) (https://babeljs.io/docs/usage/polyfill/)',
+    when: ({ mobile }) => !mobile
 };
 
 export const execute = async (answer, { ssr, appname, eslint, eslintConfig }, packages) => {

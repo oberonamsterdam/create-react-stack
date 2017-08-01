@@ -1,3 +1,4 @@
+import mobile, { execute as executeMobile } from './mobile';
 import ssr, { execute as executeSSR } from './ssr';
 import flow, { execute as executeFlow, postInstall as flowPostInstall } from './flow';
 import redux, { execute as executeRedux } from './redux';
@@ -8,6 +9,10 @@ import polyfill, { execute as executePolyfill } from './polyfill';
 import reduxPersist, { execute as executeReduxPersist } from './redux-persist';
 
 export default {
+    mobile: {
+        question: mobile,
+        execute: executeMobile
+    },
     ssr: {
         question: ssr,
         execute: executeSSR

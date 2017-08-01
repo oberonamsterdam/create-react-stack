@@ -18,7 +18,7 @@ export default {
     default: ({ ssr, flow }) => ssr && !flow ? 'standard-react' : 'react-app',
     name: 'eslintConfig',
     message: chalk`{bold What ESLint config should to be used? Enter the eslint-config-{cyan name}}`,
-    when: answers => (answers.ssr && answers.eslint) || !answers.ssr,
+    when: ({ssr, eslint, mobile }) => (ssr && eslint) || (mobile && eslint) || !ssr,
     validate: async(answer) => {
         const packageName = 'eslint-config-' + answer;
         const res = await get(`npm s ${packageName} --json`);
@@ -27,8 +27,12 @@ export default {
     }
 };
 
-export const execute = async (answer, { ssr, appname }, _, devPackages) => {
-    if(answer !== 'react-app' && !ssr || ssr) {
+export const execute = async (answer, { ssr, appname, mobile, eslint }, _, devPackages) => {
+    if(!eslint || (ssr && mobile)) {
+        return;
+    }
+    
+    if(answer !== 'react-app' && !ssr || ssr || mobile) {
         devPackages.push(`eslint-config-${answer}`);
         const res = await get(`npm info "eslint-config-${answer}@latest" peerDependencies --json`);
         const peerDeps = JSON.parse(res[0]);
@@ -55,8 +59,8 @@ export const execute = async (answer, { ssr, appname }, _, devPackages) => {
 `);
 };
 
-export const postInstall = async (answer, { appname, ssr, eslint }) => {
-    if(ssr && !eslint) {
+export const postInstall = async (answer, { appname, ssr, eslint, mobile }) => {
+    if(ssr && !eslint || mobile && !eslint) {
         return;
     }
     

@@ -10,9 +10,14 @@ export default {
     type: 'confirm',
     name: 'ssr',
     message: 'Use SSR? (server side rendering)',
+    when: ({ mobile }) => !mobile
 };
 
-export const execute = async (ssr, { appname }) => {
+export const execute = async (ssr, { appname, mobile }) => {
+    if(mobile) {
+        return;
+    }
+    
     await run(`npx ${ssr ? 'create-razzle-app' : 'create-react-app'} ${appname}`);
 
     // move components into separate components dir.

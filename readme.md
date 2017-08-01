@@ -1,5 +1,5 @@
-# create-oberon-app
-create-oberon-app is a opinionated react application generator, for projects that run on **the browser, node, and mobile.**
+# create-react-stack
+create-react-stack is a opinionated react application generator, for projects that run on **the browser, node, and mobile.**
 
 ![](https://jari.lol/aKEpwtrgY5.png)
 
@@ -15,9 +15,9 @@ It never forces you to use any of the recommended libraries included in here.
 
 ## 'installing'
 This list of libraries will likely change often, and we're planning on updating this app as often.  
-That's why it's _not_ recommended to globally install `create-oberon-app`, and running it with [npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b) instead (grabbing the latest version every time you execute it):  
+That's why it's _not_ recommended to globally install `create-react-stack`, and running it with [npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b) instead (grabbing the latest version every time you execute it):  
 ```bash
-npx create-oberon-app my-awesome-app
+npx create-react-stack my-awesome-app
 ```
 
 Optionally when using yarn, you can run:
@@ -27,12 +27,14 @@ yarn create oberon-app my-awesome-app
 
 
 ## features
+- 📱  React Native
 - 🔀  Server side rendering.  
 - 📏  [ESLint](http://eslint.org)  
-    - Optionally provide a custom config you wish to use. (falls back to `eslint-config-standard`)   
+    - Optionally provide a custom config you wish to use.     
 - ⚛  [Redux](http://redux.js.org/)  
-    - With SSR enabled, automatically reuse the generated state by the server from the client side (with `redux-persist`).  
-    - Optionally persist and rehydrate store on client side.
+    - With SSR enabled, automatically reuse the generated state by the server from the client side.  
+    - Optionally [persist and rehydrate store](https://github.com/rt2zz/redux-persist) on client side.  
+    - Automatically hooks in [the redux extension](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd) if available.
 - 💅  [styled-components](http://styled-components.com)
 - 🌊  [flowtype](https://flowtype.org)  
     - Will ask you to run flow-typed after project setup so you won't forget 😎

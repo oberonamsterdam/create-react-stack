@@ -8,12 +8,12 @@ export default {
     message: 'Use ESLint (http://eslint.js.org/)',
     
     // CRA already includes ESLint.
-    when: answers => !!answers.ssr
+    when: ({ ssr, mobile }) => !!ssr || mobile
 };
 
-export const execute = async (answer, { appname }, packages, devPackages) => {
-    if(answer) {
-        devPackages.push('eslint', 'eslint-loader');
+export const execute = async (answer, { appname, ssr }, packages, devPackages) => {
+    if(answer && ssr) {
+        devPackages.push('eslint-loader');
         packages.push('oberon-razzle-modifications');
         await addRazzleMod(appname);
         await replace({
@@ -21,6 +21,5 @@ export const execute = async (answer, { appname }, packages, devPackages) => {
             to: 'const useESLint = true;',
             files: path.join(process.cwd(), appname, 'razzle.config.js')
         });
-        
     }
 };
