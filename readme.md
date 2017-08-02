@@ -15,14 +15,14 @@ It never forces you to use any of the recommended libraries included in here.
 
 ## 'installing'
 This list of libraries will likely change often, and we're planning on updating this app as often.  
-That's why it's _not_ recommended to globally install `create-react-stack`, and running it with [npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b) instead (grabbing the latest version every time you execute it):  
+That's why you should _not_ globally install `create-react-stack`, and instead run it with [npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b) (grabbing the latest version every time you execute it):  
 ```bash
 npx create-react-stack my-awesome-app
 ```
 
 Optionally when using yarn, you can run:
 ```bash
-yarn create oberon-app my-awesome-app
+yarn create react-stack my-awesome-app
 ```
 
 
@@ -33,8 +33,8 @@ yarn create oberon-app my-awesome-app
     - Optionally provide a custom config you wish to use.     
 - ⚛  [Redux](http://redux.js.org/)  
     - With SSR enabled, automatically reuse the generated state by the server from the client side.  
-    - Optionally [persist and rehydrate store](https://github.com/rt2zz/redux-persist) on client side.  
-    - Automatically hooks in [the redux extension](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd) if available.
+    - Optionally [persist and rehydrate store](https://github.com/rt2zz/redux-persist).  
+    - Automatically hooks in [the redux extension](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd) (or [React Native Debugger](https://github.com/jhen0409/react-native-debugger)) if available.
 - 💅  [styled-components](http://styled-components.com)
 - 🌊  [flowtype](https://flowtype.org)  
     - Will ask you to run flow-typed after project setup so you won't forget 😎
