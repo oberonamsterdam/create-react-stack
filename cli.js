@@ -49,7 +49,7 @@ const get = promisify(cmd.get, {
         questionsArray = [
             {
                 message: chalk`You didn't provide a directory for the app to be created in.
-Remember, you can run COA as follows: {dim create-oberon-app my-awesome-app}
+Remember, you can run CRS as follows: {dim create-react-stack my-awesome-app}
 Please specify a name now:`,
                 name: 'appname',
                 default: 'my-awesome-app'

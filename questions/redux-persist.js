@@ -15,14 +15,14 @@ export const execute = async (answer, { appname, redux }, packages) => {
     
     let stripSection;
     if(!answer) {
-        stripSection = /\s\/\/ @coa-with-persist-start([\s\S]*?)\/\/ @coa-with-persist-end/gm;
+        stripSection = /\s\/\/ @crs-with-persist-start([\s\S]*?)\/\/ @crs-with-persist-end/gm;
     } else {
         packages.push('redux-persist');
-        stripSection = /\s\/\/ @coa-without-persist-start([\s\S]*?)\/\/ @coa-without-persist-end/gm;
+        stripSection = /\s\/\/ @crs-without-persist-start([\s\S]*?)\/\/ @crs-without-persist-end/gm;
     }
     
     await replace({
-        from: [stripSection, /\s*\/\/ @coa-(with|without)-persist-(start|end)/gm],
+        from: [stripSection, /\s*\/\/ @crs-(with|without)-persist-(start|end)/gm],
         to: ['', ''],
         files: path.join(process.cwd(), appname, 'src', 'createStore.js') 
     });
