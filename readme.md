@@ -1,7 +1,7 @@
 # create-react-stack
 create-react-stack is a opinionated react application generator, for projects that run on **the browser, node, and mobile.**
 
-![](https://jari.lol/aKEpwtrgY5.png)
+![](https://jari.lol/GIJN0FoRw5.png)
 
 ## the problem
 React is simplistic by design. It's what makes React great.  
