@@ -10,7 +10,7 @@ import cmd from 'node-cmd';
 const writeFile = promisify(fs.writeFile);
 const get = promisify(cmd.get, {
     thisArg: cmd,
-    multiArgs: true
+    multiArgs: true,
 });
 
 export default {
@@ -18,40 +18,40 @@ export default {
     default: ({ ssr, flow }) => ssr && !flow ? 'standard-react' : 'react-app',
     name: 'eslintConfig',
     message: chalk`{bold What ESLint config should to be used? Enter the eslint-config-{cyan name}}`,
-    when: ({ssr, eslint, mobile }) => (ssr && eslint) || (mobile && eslint) || !ssr,
-    validate: async(answer) => {
+    when: ({ ssr, eslint, mobile }) => (ssr && eslint) || (mobile && eslint) || !ssr,
+    validate: async (answer) => {
         const packageName = 'eslint-config-' + answer;
         const res = await get(`npm s ${packageName} --json`);
         const results = JSON.parse(res[0]).filter(result => result.name === packageName);
         return results.length ? true : `${packageName} was not found on the npm registry.`;
-    }
+    },
 };
 
 export const execute = async (answer, { ssr, appname, mobile, eslint }, _, devPackages) => {
-    if(!eslint || (ssr && mobile)) {
+    if (!eslint || (ssr && mobile)) {
         return;
     }
-    
-    if(answer !== 'react-app' && !ssr || ssr || mobile) {
+
+    if (answer !== 'react-app' && (!ssr || ssr || mobile)) {
         devPackages.push(`eslint-config-${answer}`);
         const res = await get(`npm info "eslint-config-${answer}@latest" peerDependencies --json`);
         const peerDeps = JSON.parse(res[0]);
         devPackages.push(...Object.keys(peerDeps).map(key => `${key}@${peerDeps[key]}`));
     }
-    
+
     if (answer !== 'react-app' && !ssr) {
         // eject if we're on create-react-app.
         log(chalk`You indicated a different config than {dim react-app}. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
         await run('npm run eject', {
-            cwd: path.join(process.cwd(), appname)
+            cwd: path.join(process.cwd(), appname),
         });
         await replace({
             files: path.join(process.cwd(), appname, 'package.json'),
             from: /"extends": "react-app"/g,
-            to: `"extends": "${answer}"`
+            to: `"extends": "${answer}"`,
         });
     }
-    
+
     await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
 {
     "extends": "${answer}"
@@ -60,17 +60,16 @@ export const execute = async (answer, { ssr, appname, mobile, eslint }, _, devPa
 };
 
 export const postInstall = async (answer, { appname, ssr, eslint, mobile }) => {
-    if(ssr && !eslint || mobile && !eslint) {
+    if (ssr && (!eslint || mobile) && !eslint) {
         return;
     }
-    
+
     // attempt auto fix now that config etc is in place.
     try {
         await run('npx eslint --fix src', {
-            cwd: path.join(process.cwd(), appname)
+            cwd: path.join(process.cwd(), appname),
         });
-    }
-    catch(ex) {
+    } catch (ex) {
         log('ESLint auto fix failed! Check log above.', 'warn', ex);
     }
-}
+};

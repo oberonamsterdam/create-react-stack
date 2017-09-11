@@ -11,22 +11,22 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "babel-plugin-transform-object-rest-spread": "^6.23.0",
+        "babel-plugin-transform-object-rest-spread": "^6.26.0",
         "babel-preset-env": "^1.6.0",
-        "babel-register": "^6.24.1",
-        "chalk": "^2.0.1",
+        "babel-register": "^6.26.0",
+        "chalk": "^2.1.0",
         "commander": "^2.11.0",
         "es6-promisify": "^5.0.0",
-        "fs-extra": "^4.0.0",
+        "fs-extra": "^4.0.1",
         "globby": "^6.1.0",
-        "inquirer": "^3.2.0",
+        "inquirer": "^3.2.3",
         "node-cmd": "^3.0.0",
-        "replace-in-file": "^2.5.3"
+        "replace-in-file": "^2.6.4"
     },
     "devDependencies": {
         "babel-eslint": "^7.2.3",
-        "eslint": "^4.3.0",
-        "eslint-config-oberon": "^1.0.3"
+        "eslint": "^4.6.1",
+        "eslint-config-oberon": "^1.1.2"
     },
     "repository": {
         "url": "http://github.com/oberonamsterdam/create-react-stack"

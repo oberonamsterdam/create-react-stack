@@ -14,16 +14,14 @@ export default (initial) => {
             // @crs-with-persist-start
             autoRehydrate(),
             // @crs-with-persist-end
-            global.reduxNativeDevTools ?
-                global.reduxNativeDevTools(/*options*/) :
-                (noop) => noop
-        )
+            global.reduxNativeDevTools ? global.reduxNativeDevTools(/* options */) : (noop) => noop,
+        ),
     );
 
     // @crs-with-persist-start
     persistStore(store, {
-        storage: AsyncStorage
+        storage: AsyncStorage,
     });
     // @crs-with-persist-end
     return store;
-}
+};

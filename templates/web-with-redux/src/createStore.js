@@ -13,8 +13,8 @@ export default (initial) => new Promise(resolve => {
         initial || {}
         // @crs-with-persist-start
         , composeEnhancers(
-            autoRehydrate()
-        )
+            autoRehydrate(),
+        ),
         // @crs-with-persist-end
     );
 

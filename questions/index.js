@@ -11,43 +11,43 @@ import reduxPersist, { execute as executeReduxPersist } from './redux-persist';
 export default {
     mobile: {
         question: mobile,
-        execute: executeMobile
+        execute: executeMobile,
     },
     ssr: {
         question: ssr,
-        execute: executeSSR
+        execute: executeSSR,
     },
     flow: {
         question: flow,
-        execute: executeFlow
+        execute: executeFlow,
     },
     redux: {
         question: redux,
-        execute: executeRedux
+        execute: executeRedux,
     },
     reduxPersist: {
         question: reduxPersist,
-        execute: executeReduxPersist
+        execute: executeReduxPersist,
     },
     eslint: {
         question: eslint,
-        execute: executeEslint
+        execute: executeEslint,
     },
     eslintConfig: {
         question: eslintConfig,
-        execute: executeEslintConfig
+        execute: executeEslintConfig,
     },
     polyfill: {
         question: polyfill,
-        execute: executePolyfill
+        execute: executePolyfill,
     },
     styledComponents: {
         question: styledComponents,
-        execute: executeStyledComponents
-    }
+        execute: executeStyledComponents,
+    },
 };
 
 export const postInstall = {
     eslint: eslintPostInstall,
-    flow: flowPostInstall
+    flow: flowPostInstall,
 };

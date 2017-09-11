@@ -13,7 +13,7 @@ type AppProps = {
 const App = (props: AppProps) => (
     <Provider store={props.store}>
         <Switch>
-            <Route exact path="/" component={Home} />
+            <Route exact path="/" component={Home}/>
         </Switch>
     </Provider>
 );

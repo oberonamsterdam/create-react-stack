@@ -14,7 +14,7 @@ import path from 'path';
 
 const get = promisify(cmd.get, {
     thisArg: cmd,
-    multiArgs: true
+    multiArgs: true,
 });
 
 (async () => {
@@ -31,28 +31,28 @@ const get = promisify(cmd.get, {
         useYarn = true;
         // I wish there was a way to force create-react-app / create-razzle-app to not use yarn...
         log(chalk`{bold Using yarn!} If you wish to use npm instead, you will have to remove yarn: {dim npm remove yarn -g} (if you installed it with npm)`, 'warn');
-    } catch(ex) {
-        //eslint disable-line no-empty
+    } catch (ex) {
+        // eslint disable-line no-empty
     }
-    
+
     try {
         await get('which npx');
-    } catch(ex) {
+    } catch (ex) {
         log(chalk`Unable to locate npx, please update npm to 5.3+ by running {dim npm i npm -g}`, 'error');
         process.exit(1);
     }
-    
+
     const appname = program.args[0];
     let questionsArray = Object.values(questions).map(({ question }) => question);
-    
-    if(!appname) {
+
+    if (!appname) {
         questionsArray = [
             {
                 message: chalk`You didn't provide a directory for the app to be created in.
 Remember, you can run CRS as follows: {dim create-react-stack my-awesome-app}
 Please specify a name now:`,
                 name: 'appname',
-                default: 'my-awesome-app'
+                default: 'my-awesome-app',
             },
             ...questionsArray
         ];
@@ -60,47 +60,48 @@ Please specify a name now:`,
 
     log('📋  Please enter your order:');
     const answers = await inquirer.prompt(questionsArray);
-    if(!answers.appname) {
+    if (!answers.appname) {
         answers.appname = appname;
     }
-    
+
     log(chalk`🍳  Cooking up a fresh new app...`);
-    
-    let packages = [], devPackages = [];
-    for(const key of Object.keys(questions)) {
+
+    const packages = [];
+    const devPackages = [];
+    for (const key of Object.keys(questions)) {
         const question = questions[key];
         await question.execute(answers[key], answers, packages, devPackages);
     }
-    
-    if(packages.length) {
+
+    if (packages.length) {
         console.log();
         console.log(chalk`Installing {bold.blue packages}:`);
-        for(const pkg of packages) {
+        for (const pkg of packages) {
             console.log(chalk`    - {blue ${pkg}}`);
         }
         console.log();
 
         await run(`${useYarn ? 'yarn add' : 'npm install'} ${packages.join(' ')} --${useYarn ? 'dev' : 'save-dev'}`, {
-            cwd: path.join(process.cwd(), answers.appname)
+            cwd: path.join(process.cwd(), answers.appname),
         });
     }
-    if(devPackages.length) {
+    if (devPackages.length) {
         console.log();
         console.log(chalk`Installing {bold.green dev packages}:`);
-        for(const pkg of devPackages) {
+        for (const pkg of devPackages) {
             console.log(chalk`    - {green ${pkg}}`);
         }
         console.log();
-        
+
         await run(`${useYarn ? 'yarn add' : 'npm install'} ${devPackages.join(' ')} --${useYarn ? 'dev' : 'save-dev'}`, {
-            cwd: path.join(process.cwd(), answers.appname)
+            cwd: path.join(process.cwd(), answers.appname),
         });
     }
 
     log('🚚  All packages installed.');
 
-    for(const key of Object.keys(questions)) {
-        if(key in postInstall) {
+    for (const key of Object.keys(questions)) {
+        if (key in postInstall) {
             await postInstall[key](answers[key], answers);
         }
     }

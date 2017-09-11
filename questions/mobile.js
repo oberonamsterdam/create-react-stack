@@ -7,7 +7,7 @@ export default {
 };
 
 export const execute = async (answer, { appname }) => {
-    if(answer) {
+    if (answer) {
         await run(`npx react-native-cli init ${appname}`);
     }
 };

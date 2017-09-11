@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import {
     StyleSheet,
     Text,
-    View
+    View,
 } from 'react-native';
 
 export default class App extends Component {
-    render() {
+    render () {
         return (
             <View style={styles.container}>
                 <Text style={styles.welcome}>

@@ -5,7 +5,7 @@ export default {
 };
 
 export const execute = async (answer, _, packages) => {
-    if(answer) {
+    if (answer) {
         packages.push('styled-components');
     }
 };

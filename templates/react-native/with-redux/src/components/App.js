@@ -2,14 +2,15 @@ import React, { Component } from 'react';
 import {
     StyleSheet,
     Text,
-    View
+    View,
 } from 'react-native';
 import createStore from '../createStore';
 import { Provider } from 'react-redux';
+
 const store = createStore();
 
 export default class App extends Component {
-    render() {
+    render () {
         return (
             <Provider store={store}>
                 <View style={styles.container}>
