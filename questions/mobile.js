@@ -6,7 +6,7 @@ export default {
     message: 'Are you building a mobile project? (https://facebook.github.io/react-native/)',
 };
 
-export const execute = async (answer, { appname }) => {
+export const execute = async ({ answer, answers: { appname } }) => {
     if (answer) {
         await run(`npx react-native-cli init ${appname}`);
     }

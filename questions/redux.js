@@ -10,7 +10,7 @@ export default {
     message: 'Use redux? (http://redux.js.org/)',
 };
 
-export const execute = async (answer, { appname, ssr, flow, mobile }, packages) => {
+export const execute = async ({ answer, answers: { appname, ssr, flow, mobile }, packages }) => {
     if (answer) {
         packages.push('redux', 'react-redux');
     }

@@ -14,19 +14,19 @@ export default {
     when: ({ mobile }) => !mobile,
 };
 
-export const execute = async (ssr, { appname, mobile }) => {
+export const execute = async ({ answer, answers: { appname, mobile } }) => {
     if (mobile) {
         return;
     }
 
-    await run(`npx ${ssr ? 'create-razzle-app' : 'create-react-app'} ${appname}`);
+    await run(`npx ${answer ? 'create-razzle-app' : 'create-react-app'} ${appname}`);
 
     // move components into separate components dir.
     const src = path.join(process.cwd(), appname, 'src');
     const components = path.join(src, 'components');
     let files = ['App.js', 'App.test.js', 'App.css'];
 
-    if (ssr) {
+    if (answer) {
         files = [...files, 'Home.js', 'Home.css', 'react.svg'];
     } else {
         files = [...files, 'logo.svg'];
@@ -41,7 +41,7 @@ export const execute = async (ssr, { appname, mobile }) => {
     await Promise.all(promises);
 
     await replace({
-        files: ssr ? [path.join(src, 'client.js'), path.join(src, 'server.js')] : path.join(src, 'index.js'),
+        files: answer ? [path.join(src, 'client.js'), path.join(src, 'server.js')] : path.join(src, 'index.js'),
         from: /import App from '\.\/App';/g,
         to: 'import App from \'./components/App\'',
     });

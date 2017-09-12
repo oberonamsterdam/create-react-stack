@@ -8,7 +8,7 @@ export default {
     when: ({ redux }) => redux,
 };
 
-export const execute = async (answer, { appname, redux }, packages) => {
+export const execute = async ({ answer, answers: { appname, redux }, packages }) => {
     if (!redux) {
         return;
     }

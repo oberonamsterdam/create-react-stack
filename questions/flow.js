@@ -13,13 +13,13 @@ export default {
     message: 'Use flow? (http://flow.org)',
 };
 
-export const execute = async (answer, answers, packages, devPackages) => {
+export const execute = async ({ answer, devPackages }) => {
     if (answer) {
         devPackages.push('flow-bin');
     }
 };
 
-export const postInstall = async (answer, { appname, mobile }) => {
+export const postInstall = async ({ answer, answers: { appname, mobile } }) => {
     if (!answer) {
         if (mobile) {
             // react native includes a .flowconfig by default, so we'll delete it. 

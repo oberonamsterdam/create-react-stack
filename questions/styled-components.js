@@ -4,7 +4,7 @@ export default {
     message: 'Use styled-components? (http://styled-components.com)',
 };
 
-export const execute = async (answer, _, packages) => {
+export const execute = async ({ answer, packages }) => {
     if (answer) {
         packages.push('styled-components');
     }

@@ -27,7 +27,7 @@ export default {
     },
 };
 
-export const execute = async (answer, { ssr, appname, mobile, eslint }, _, devPackages) => {
+export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint }, devPackages }) => {
     if (!eslint || (ssr && mobile)) {
         return;
     }
@@ -59,7 +59,7 @@ export const execute = async (answer, { ssr, appname, mobile, eslint }, _, devPa
 `);
 };
 
-export const postInstall = async (answer, { appname, ssr, eslint, mobile }) => {
+export const postInstall = async ({ answers: { appname, ssr, eslint, mobile } }) => {
     if (ssr && (!eslint || mobile) && !eslint) {
         return;
     }

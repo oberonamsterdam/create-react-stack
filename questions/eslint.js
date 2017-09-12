@@ -11,7 +11,7 @@ export default {
     when: ({ ssr, mobile }) => !!ssr || mobile,
 };
 
-export const execute = async (answer, { appname, ssr }, packages, devPackages) => {
+export const execute = async ({ answer, answers: { appname, ssr }, packages, devPackages }) => {
     if (answer && ssr) {
         devPackages.push('eslint-loader');
         packages.push('oberon-razzle-modifications');

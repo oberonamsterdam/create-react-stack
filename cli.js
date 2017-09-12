@@ -70,7 +70,7 @@ Please specify a name now:`,
     const devPackages = [];
     for (const key of Object.keys(questions)) {
         const question = questions[key];
-        await question.execute(answers[key], answers, packages, devPackages);
+        await question.execute({answer: answers[key], answers, packages, devPackages});
     }
 
     if (packages.length) {
@@ -102,7 +102,7 @@ Please specify a name now:`,
 
     for (const key of Object.keys(questions)) {
         if (key in postInstall) {
-            await postInstall[key](answers[key], answers);
+            await postInstall[key]({ answer: answers[key], answers });
         }
     }
 

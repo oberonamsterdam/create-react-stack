@@ -16,7 +16,7 @@ export default {
     when: ({ mobile }) => !mobile,
 };
 
-export const execute = async (answer, { ssr, appname, eslint, eslintConfig }, packages) => {
+export const execute = async ({ answer, answers: { ssr, appname, eslint, eslintConfig }, packages }) => {
     if (answer) {
         if (ssr) {
             if (!eslint) {
