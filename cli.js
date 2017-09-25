@@ -58,7 +58,7 @@ Please specify a name now:`,
         ];
     }
 
-    log('📋  Please enter your order:');
+    log('📋  Please choose your stack:');
     const answers = await inquirer.prompt(questionsArray);
     if (!answers.appname) {
         answers.appname = appname;

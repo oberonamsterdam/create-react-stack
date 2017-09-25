@@ -30,7 +30,7 @@ export const execute = async ({ answer, answers: { ssr, appname, eslint, eslintC
                 files: path.join(process.cwd(), appname, 'razzle.config.js'),
             });
         } else {
-            if (!eslintConfig) {
+            if (eslintConfig === 'react-app') {
                 log(chalk`You indicated that you wanted to use {dim babel-polyfill} instead of the default polyfill. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
                 await run('npm run eject', {
                     cwd: path.join(process.cwd(), appname),
