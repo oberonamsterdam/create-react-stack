@@ -29,8 +29,9 @@ const get = promisify(cmd.get, {
     try {
         await get('which yarn');
         useYarn = true;
-        // I wish there was a way to force create-react-app / create-razzle-app to not use yarn...
         log(chalk`{bold Using yarn!} If you wish to use npm instead, you will have to remove yarn: {dim npm remove yarn -g} (if you installed it with npm)`, 'warn');
+        log(chalk`CRA issue: {underline https://github.com/facebookincubator/create-react-app/issues/2809}`, 'warn');
+        log(chalk`Razzle issue: {underline https://github.com/jaredpalmer/razzle/issues/365}`, 'warn');
     } catch (ex) {
         // eslint disable-line no-empty
     }
@@ -81,7 +82,7 @@ Please specify a name now:`,
         }
         console.log();
 
-        await run(`${useYarn ? 'yarn add' : 'npm install'} ${packages.join(' ')} --${useYarn ? 'dev' : 'save-dev'}`, {
+        await run(`${useYarn ? 'yarn add' : 'npm install'} ${packages.join(' ')}`, {
             cwd: path.join(process.cwd(), answers.appname),
         });
     }
