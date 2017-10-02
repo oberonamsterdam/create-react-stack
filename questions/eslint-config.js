@@ -14,11 +14,9 @@ const get = promisify(cmd.get, {
 });
 
 export default {
-    // standard does not support flow, so react-app is probably a more suitable choice
     default: ({ ssr, flow }) => ssr && !flow ? 'standard-react' : 'react-app',
     name: 'eslintConfig',
     message: chalk`{bold What ESLint config should to be used? Enter the eslint-config-{cyan name}}`,
-    when: ({ ssr, eslint, mobile }) => (ssr && eslint) || (mobile && eslint) || !ssr,
     validate: async (answer) => {
         const packageName = 'eslint-config-' + answer;
         const res = await get(`npm s ${packageName} --json`);
@@ -28,7 +26,7 @@ export default {
 };
 
 export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint }, devPackages }) => {
-    if (!eslint || (ssr && mobile)) {
+    if (mobile && !eslint) {
         return;
     }
 
@@ -50,7 +48,9 @@ export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint 
             from: /"extends": "react-app"/g,
             to: `"extends": "${answer}"`,
         });
-    } else if ((answer !== 'react-app' && !mobile) || (mobile && eslint)) {
+    }
+
+    if ((answer !== 'react-app' && ssr) || (mobile && eslint)) {
         await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
 {
     "extends": "${answer}"
