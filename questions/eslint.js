@@ -1,25 +1,24 @@
-import path from 'path';
-import replace from 'replace-in-file';
-import addRazzleMod from '../services/addRazzleMod';
+import chalk from 'chalk';
+import log from '../services/log';
 
 export default {
     type: 'confirm',
     name: 'eslint',
     message: 'Use ESLint (http://eslint.js.org/)',
 
-    // CRA already includes ESLint.
-    when: ({ ssr, mobile }) => !!ssr || mobile,
+    // CRA & razzle already include eslint by default
+    when: ({ mobile }) => mobile,
 };
 
-export const execute = async ({ answer, answers: { appname, ssr }, packages, devPackages }) => {
-    if (answer && ssr) {
-        devPackages.push('eslint-loader');
-        packages.push('oberon-razzle-modifications');
-        await addRazzleMod(appname);
-        await replace({
-            from: /const useESLint = false;/,
-            to: 'const useESLint = true;',
-            files: path.join(process.cwd(), appname, 'razzle.config.js'),
-        });
+export const execute = async ({ answer, devPackages }) => {
+    if (answer) {
+        devPackages.push('eslint');
+    }
+};
+
+export const postInstall = ({answer}) => {
+    if (answer) {
+        log(chalk`ESLint has been installed, but will still need to be configured in your IDE.`, 'warn');
+        log(chalk`Configure it or run {dim npx eslint .} manually to get linter output.`, 'warn');
     }
 };

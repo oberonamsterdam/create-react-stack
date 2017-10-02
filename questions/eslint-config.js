@@ -1,11 +1,11 @@
 import chalk from 'chalk';
-import path from 'path';
-import run from '../services/run';
-import replace from 'replace-in-file';
-import fs from 'fs';
-import log from '../services/log';
 import promisify from 'es6-promisify';
+import fs from 'fs';
 import cmd from 'node-cmd';
+import path from 'path';
+import replace from 'replace-in-file';
+import log from '../services/log';
+import run from '../services/run';
 
 const writeFile = promisify(fs.writeFile);
 const get = promisify(cmd.get, {
@@ -32,14 +32,14 @@ export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint 
         return;
     }
 
-    if (answer !== 'react-app' && (!ssr || ssr || mobile)) {
+    if ((answer !== 'react-app' && !mobile) || (mobile && eslint)) {
         devPackages.push(`eslint-config-${answer}`);
         const res = await get(`npm info "eslint-config-${answer}@latest" peerDependencies --json`);
         const peerDeps = JSON.parse(res[0]);
         devPackages.push(...Object.keys(peerDeps).map(key => `${key}@${peerDeps[key]}`));
     }
 
-    if (answer !== 'react-app' && !ssr) {
+    if (answer !== 'react-app' && !ssr && !mobile) {
         // eject if we're on create-react-app.
         log(chalk`You indicated a different config than {dim react-app}. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
         await run('npm run eject', {
@@ -50,17 +50,17 @@ export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint 
             from: /"extends": "react-app"/g,
             to: `"extends": "${answer}"`,
         });
-    }
-
-    await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
+    } else if ((answer !== 'react-app' && !mobile) || (mobile && eslint)) {
+        await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
 {
     "extends": "${answer}"
 }
 `);
+    }
 };
 
-export const postInstall = async ({ answers: { appname, ssr, eslint, mobile } }) => {
-    if (ssr && (!eslint || mobile) && !eslint) {
+export const postInstall = async ({ answers: { appname, eslint, mobile } }) => {
+    if (mobile && !eslint) {
         return;
     }
 

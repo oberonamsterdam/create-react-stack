@@ -7,11 +7,10 @@ const writeFile = promisify(fs.writeFile);
 export default async appname => {
     // language=JavaScript
     await writeFile(path.join(process.cwd(), appname, 'razzle.config.js'), `
-const useESLint = false;
 const usePolyfill = false;
 
 module.exports = {
-    modify: require('oberon-razzle-modifications')(useESLint, usePolyfill)
+    modify: require('oberon-razzle-modifications')({ usePolyfill: usePolyfill})
 }
     `);
 };
