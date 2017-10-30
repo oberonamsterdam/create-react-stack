@@ -1,6 +1,6 @@
 {
     "name": "create-react-stack",
-    "version": "0.1.2",
+    "version": "0.1.4",
     "description": "",
     "main": "src/index.js",
     "scripts": {
