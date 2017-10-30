@@ -2,7 +2,7 @@
 
 import promisify from 'es6-promisify';
 import chalk from 'chalk';
-import _package from './package.json';
+import _package from '../package.json';
 import questions from './questions';
 import inquirer from 'inquirer';
 import program from 'commander';

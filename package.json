@@ -1,19 +1,19 @@
 {
     "name": "create-react-stack",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "",
-    "main": "index.js",
+    "main": "src/index.js",
     "scripts": {
+        "start": "backpack",
+        "build": "backpack build && echo \"#!/usr/bin/env node\\n$(cat build/main.js)\" > build/main.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "bin": "index.js",
+    "bin": "build/main.js",
     "keywords": [],
-    "author": "",
-    "license": "ISC",
+    "author": "Oberon <jari@oberon.nl>",
+    "license": "MIT",
     "dependencies": {
-        "babel-plugin-transform-object-rest-spread": "^6.26.0",
-        "babel-preset-env": "^1.6.0",
-        "babel-register": "^6.26.0",
+        "backpack-core": "^0.4.2",
         "chalk": "^2.1.0",
         "commander": "^2.11.0",
         "es6-promisify": "^5.0.0",
