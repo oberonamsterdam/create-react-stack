@@ -10,12 +10,13 @@ export default (initial) => new Promise(resolve => {
         combineReducers({
             // add your reducers here
         }),
-        initial || {}
-        // @crs-with-persist-start
-        , composeEnhancers(
+        initial || {},
+        composeEnhancers(
+            // add your middleware here
+            // @crs-with-persist-start
             autoRehydrate(),
+            // @crs-with-persist-end
         ),
-        // @crs-with-persist-end
     );
 
     // @crs-with-persist-start
@@ -28,6 +29,6 @@ export default (initial) => new Promise(resolve => {
     }
     // @crs-with-persist-end
     // @crs-without-persist-start
-    resolve();
+    resolve(store);
     // @crs-without-persist-end
 });
