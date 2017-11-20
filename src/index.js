@@ -1,16 +1,16 @@
 /* eslint-disable no-console */
 
-import promisify from 'es6-promisify';
 import chalk from 'chalk';
+import program from 'commander';
+import promisify from 'es6-promisify';
+import inquirer from 'inquirer';
+import cmd from 'node-cmd';
+import path from 'path';
 import _package from '../package.json';
 import questions from './questions';
-import inquirer from 'inquirer';
-import program from 'commander';
-import cmd from 'node-cmd';
-import log from './services/log';
 import { postInstall } from './questions/index';
+import log from './services/log';
 import run from './services/run';
-import path from 'path';
 
 const get = promisify(cmd.get, {
     thisArg: cmd,
@@ -71,7 +71,7 @@ Please specify a name now:`,
     const devPackages = [];
     for (const key of Object.keys(questions)) {
         const question = questions[key];
-        await question.execute({answer: answers[key], answers, packages, devPackages});
+        await question.execute({ answer: answers[key], answers, packages, devPackages });
     }
 
     if (packages.length) {

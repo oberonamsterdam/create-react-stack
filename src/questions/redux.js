@@ -1,7 +1,7 @@
-import path from 'path';
-import replace from 'replace-in-file';
 import fs from 'fs-extra';
 import globby from 'globby';
+import path from 'path';
+import replace from 'replace-in-file';
 import log from '../services/log';
 
 export default {
@@ -90,7 +90,7 @@ import serialize from 'serialize-javascript';`,
         await replace({
             from: /%appname%/g,
             to: appname,
-            files: path.join(process.cwd(), appname, 'index.*.js'),
+            files: path.join(process.cwd(), appname, 'index.js'),
         });
     }
 };
