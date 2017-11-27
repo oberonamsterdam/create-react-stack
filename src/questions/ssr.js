@@ -1,8 +1,8 @@
-import run from '../services/run';
 import promisify from 'es6-promisify';
 import fs from 'fs';
 import path from 'path';
 import replace from 'replace-in-file';
+import run from '../services/run';
 
 const mv = promisify(fs.rename, { multiArgs: true });
 const mkdir = promisify(fs.mkdir, { multiArgs: true });
@@ -11,7 +11,9 @@ export default {
     type: 'confirm',
     name: 'ssr',
     message: 'Use SSR? (server side rendering)',
-    when: ({ mobile }) => !mobile,
+    when: ({ mobile }) => {
+        return !mobile;
+    },
 };
 
 export const execute = async ({ answer, answers: { appname, mobile } }) => {

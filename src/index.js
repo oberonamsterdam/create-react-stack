@@ -6,7 +6,9 @@ import promisify from 'es6-promisify';
 import inquirer from 'inquirer';
 import cmd from 'node-cmd';
 import path from 'path';
+import Rx from 'rx';
 import _package from '../package.json';
+import store from './createStore';
 import questions from './questions';
 import { postInstall } from './questions/index';
 import log from './services/log';
@@ -44,23 +46,71 @@ const get = promisify(cmd.get, {
     }
 
     const appname = program.args[0];
-    let questionsArray = Object.values(questions).map(({ question }) => question);
+    let questionsArray = Object.keys(questions).map((key) => questions[key]);
 
     if (!appname) {
         questionsArray = [
             {
-                message: chalk`You didn't provide a directory for the app to be created in.
+                question: {
+                    message: chalk`You didn't provide a directory for the app to be created in.
 Remember, you can run CRS as follows: {dim create-react-stack my-awesome-app}
 Please specify a name now:`,
-                name: 'appname',
-                default: 'my-awesome-app',
+                    name: 'appname',
+                    default: 'my-awesome-app',
+                },
             },
             ...questionsArray
         ];
     }
 
     log('📋  Please choose your stack:');
-    const answers = await inquirer.prompt(questionsArray);
+
+    const prompts = new Rx.Subject();
+    let i = 0;
+
+    const answers = await new Promise((resolve, reject) => {
+        const answers = {};
+        const onNext = ({ name, answer }) => {
+            // TODO add answers to state
+            // TODO check for alphanumeric values in appname, add validate to question
+            answers[name] = answer;
+            i++;
+            if (questionsArray[i]) {
+                const arr = store.getState().answers;
+                arr.push({ [name]: answer });
+                store.changeState({
+                    answers: arr,
+                });
+                const fun = questionsArray[i].question.when;
+                if (typeof fun === 'function') {
+                    const willNotSkip = questionsArray[i].question.when(answers);
+                    if (!willNotSkip) {
+                        i++;
+                    }
+                    prompts.onNext(questionsArray[i].question);
+                } else {
+                    prompts.onNext(questionsArray[i].question);
+                }
+            } else {
+                prompts.onCompleted();
+            }
+        };
+        const onError = (err) => {
+            console.log('onError');
+            reject(err);
+        };
+        const onExit = () => {
+            resolve(answers);
+        };
+
+        inquirer.prompt(prompts).ui.process.subscribe(
+            onNext,
+            onError,
+            onExit,
+        );
+        prompts.onNext(questionsArray[0].question);
+    });
+
     if (!answers.appname) {
         answers.appname = appname;
     }

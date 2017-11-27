@@ -4,6 +4,7 @@ import fs from 'fs';
 import cmd from 'node-cmd';
 import path from 'path';
 import replace from 'replace-in-file';
+import store from '../createStore';
 import log from '../services/log';
 import run from '../services/run';
 
@@ -40,6 +41,12 @@ export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint 
     if (answer !== 'react-app' && !ssr && !mobile) {
         // eject if we're on create-react-app.
         log(chalk`You indicated a different config than {dim react-app}. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
+
+        // update global state
+        store.changeState({
+            createReactAppEjected: true,
+        });
+
         await run('npm run eject', {
             cwd: path.join(process.cwd(), appname),
         });
