@@ -22,7 +22,8 @@
         "globby": "^6.1.0",
         "inquirer": "^3.2.3",
         "node-cmd": "^3.0.0",
-        "replace-in-file": "^2.6.4"
+        "replace-in-file": "^2.6.4",
+        "rx": "^4.1.0"
     },
     "devDependencies": {
         "babel-eslint": "^7.2.3",

@@ -71,7 +71,6 @@ Please specify a name now:`,
     const answers = await new Promise((resolve, reject) => {
         const answers = {};
         const onNext = ({ name, answer }) => {
-            // TODO add answers to state
             // TODO check for alphanumeric values in appname, add validate to question
             answers[name] = answer;
             i++;

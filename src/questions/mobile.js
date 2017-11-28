@@ -8,6 +8,9 @@ export default {
 
 export const execute = async ({ answer, answers: { appname } }) => {
     if (answer) {
+        // detect if name is hyphenated, store it here and run
+        // a project rename after npx is done running
+        // https://www.npmjs.com/package/react-native-rename
         await run(`npx react-native-cli init ${appname}`);
     }
 };
