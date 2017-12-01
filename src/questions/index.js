@@ -12,8 +12,7 @@ import reduxPersistQuestion, { execute as executeReduxPersist } from './redux-pe
 import ssrQuestion, { execute as executeSSR } from './ssr';
 import styledComponentsQuestion, { execute as executeStyledComponents } from './styled-components';
 
-// not used atm but nice to have
-const { mobile, ssr, redux, reduxPersist, eslint, eslintConfig, polyfill, styledComponent } = QUESTION_TYPES;
+const { mobile, ssr, redux, reduxPersist, eslint, eslintConfig, polyfill, styledComponents, flow } = QUESTION_TYPES;
 
 // requirements are for skipping exec functions of questions.
 // condition should return true if should exist
@@ -21,6 +20,7 @@ export default {
     mobile: {
         question: mobileQuestion,
         execute: executeMobile,
+        type: mobile,
         requirements: [
             {
                 condition: ({ answer }) => !!answer,
@@ -30,6 +30,7 @@ export default {
     ssr: {
         question: ssrQuestion,
         execute: executeSSR,
+        type: ssr,
         requirements: [
             {
                 condition: ({ mobile }) => !mobile,
@@ -39,6 +40,7 @@ export default {
     flow: {
         question: flowQuestion,
         execute: executeFlow,
+        type: flow,
         requirements: [
             {
                 condition: ({ answer }) => !!answer,
@@ -48,11 +50,13 @@ export default {
     redux: {
         question: reduxQuestion,
         execute: executeRedux,
+        type: redux,
         requirements: [],
     },
     reduxPersist: {
         question: reduxPersistQuestion,
         execute: executeReduxPersist,
+        type: reduxPersist,
         requirements: [
             {
                 condition: ({ answers: { redux } }) => redux,
@@ -62,6 +66,7 @@ export default {
     eslint: {
         question: eslintQuestion,
         execute: executeEslint,
+        type: eslint,
         requirements: [
             {
                 condition: ({ answer }) => !!answer,
@@ -71,6 +76,7 @@ export default {
     eslintConfig: {
         question: eslintConfigQuestion,
         execute: executeEslintConfig,
+        type: eslintConfig,
         requirements: [
             {
                 condition: ({ answers: { mobile, eslint } }) => !(mobile && !eslint),
@@ -80,15 +86,20 @@ export default {
     polyfill: {
         question: polyfillQuestion,
         execute: executePolyfill,
+        type: polyfill,
         requirements: [
             {
-                condition: ({ answer }) => !!answer,
+                condition: ({ answer, answers: { mobile } }) => {
+                    console.log(mobile !== true, !!answer);
+                    return !!answer && mobile !== true;
+                },
             },
         ],
     },
     styledComponents: {
         question: styledComponentsQuestion,
         execute: executeStyledComponents,
+        type: styledComponents,
         requirements: [
             {
                 condition: ({ answer }) => !!answer,

@@ -8,9 +8,11 @@ import cmd from 'node-cmd';
 import path from 'path';
 import Rx from 'rx';
 import _package from '../package.json';
+import { QUESTION_TYPES } from './constants';
 import { store } from './createStore';
 import questions from './questions';
 import { postInstall } from './questions/index';
+import { checkForValidAppname } from './services/Helpers';
 import log from './services/log';
 import run from './services/run';
 
@@ -71,6 +73,12 @@ Please specify a name now:`,
     const answers = await new Promise((resolve, reject) => {
         const answers = {};
         const onNext = ({ name, answer }) => {
+            // TODO clean this up, this is for mobile to check if the appname is valid
+            // TODO because of react-native-cli's policy on alphanumeric only appnames.
+            if (name === QUESTION_TYPES.mobile && answer === true) {
+                checkForValidAppname(answers.appname);
+            }
+
             const state = store.getState();
             // means we have an error and should quit process
             if (state.error.length > 0) {
@@ -175,20 +183,28 @@ Please specify a name now:`,
 
     log(chalk`🍳  Cooking up a fresh new app...`);
 
+    // TODO Currently storing snippets in snippets.js breaks the replace
+    // TODO investigate.
     const packages = [];
     const devPackages = [];
     for (const key of Object.keys(questions)) {
+        if (answers[key] === false) {
+            continue;
+        }
         const question = questions[key];
-        let validExecute;
+        let invalidExecute;
         if (question.requirements.length > 0) {
-            validExecute = question.requirements.filter(requirement => {
+            invalidExecute = question.requirements.filter(requirement => {
                 if (typeof requirement.condition === 'function') {
-                    return requirement.condition({ answers: answers, answer: answers[key] });
+                    return !requirement.condition({
+                        answers: answers,
+                        answer: answers[key],
+                    });
                 } else {
-                    return requirement.condition;
+                    return !requirement.condition;
                 }
             });
-            if (validExecute.length > 0) {
+            if (invalidExecute.length > 0) {
                 continue;
             }
         }

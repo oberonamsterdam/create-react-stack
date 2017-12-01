@@ -30,6 +30,10 @@ class Store {
             ...payload,
         };
     }
+
+    dispatch (action) {
+
+    }
 }
 
 export default (defaultState = {}) => new Store(defaultState);

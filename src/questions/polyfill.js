@@ -20,6 +20,9 @@ export default {
 
 export const execute = async ({ answer, answers: { ssr, appname, eslintConfig }, packages }) => {
     const { generator } = store.getState();
+    // TODO if on git repo eject fails because project was just added
+    // TODO this should not happen normally though since this is structure of having multiple projects in 1
+    // TODO repo is not normal.
     if (generator === GENERATOR_TYPES.razzle) {
         packages.push('oberon-razzle-modifications');
         await addRazzleMod(appname);

@@ -7,6 +7,7 @@ export const QUESTION_TYPES = {
     mobile: 'mobile',
     ssr: 'ssr',
     redux: 'redux',
+    flow: 'flow',
     reduxPersist: 'reduxPersist',
     eslint: 'eslint',
     eslintConfig: 'eslintConfig',

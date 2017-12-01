@@ -29,6 +29,7 @@ export const postInstall = async ({ answer, answers: { appname, mobile } }) => {
     }
 
     if (!mobile) {
+        // TODO breaks atm. command not found: flow
         await run('npx flow init', {
             cwd: path.join(process.cwd(), appname),
         });

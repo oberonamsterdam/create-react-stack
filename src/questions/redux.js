@@ -28,22 +28,22 @@ export const execute = async ({ answer, answers: { appname, ssr, flow, mobile },
             packages.push('serialize-javascript');
 
             await replace({
-                from: reduxSsr.server.from,
-                to: reduxSsr.server.to,
+                from: [reduxSsr.server.from], // *confused monkey sounds*, this needs to be wrapped in an Array, even though the reference IS an array
+                to: [reduxSsr.server.to],
                 files: path.join(process.cwd(), appname, 'src', 'server.js'),
             });
 
             await replace({
-                from: reduxSsr.client.from,
-                to: reduxSsr.client.to,
+                from: [reduxSsr.client.from],
+                to: [reduxSsr.client.to],
                 files: path.join(process.cwd(), appname, 'src', 'client.js'),
             });
 
             await fs.copy(path.join(template, 'components', `App${flow ? '-with-flow' : ''}.js`), path.join(src, 'components', 'App.js'));
         } else if (generator === createReactApp) {
             await replace({
-                from: reduxNoSsr.index.from,
-                to: reduxNoSsr.index.from,
+                from: [reduxNoSsr.index.from],
+                to: [reduxNoSsr.index.from],
                 files: path.join(process.cwd(), appname, 'src', 'index.js'),
             });
         }
