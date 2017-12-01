@@ -2,6 +2,8 @@ import promisify from 'es6-promisify';
 import fs from 'fs';
 import path from 'path';
 import replace from 'replace-in-file';
+import { GENERATOR_TYPES } from '../constants';
+import { store } from '../createStore';
 import run from '../services/run';
 
 const mv = promisify(fs.rename, { multiArgs: true });
@@ -9,19 +11,19 @@ const mkdir = promisify(fs.mkdir, { multiArgs: true });
 
 export default {
     type: 'confirm',
-    name: 'ssr',
+    name: 'reduxSsr',
     message: 'Use SSR? (server side rendering)',
-    when: ({ mobile }) => {
-        return !mobile;
-    },
+    when: ({ mobile }) => !mobile,
 };
 
-export const execute = async ({ answer, answers: { appname, mobile } }) => {
-    if (mobile) {
-        return;
-    }
+export const execute = async ({ answer, answers: { appname } }) => {
+    const { createReactApp, razzle } = GENERATOR_TYPES;
+    const generator = answer ? razzle : createReactApp;
+    store.changeState({
+        generator: generator,
+    });
 
-    await run(`npx ${answer ? 'create-razzle-app' : 'create-react-app'} ${appname}`);
+    await run(`npx ${generator} ${appname}`);
 
     // move components into separate components dir.
     const src = path.join(process.cwd(), appname, 'src');

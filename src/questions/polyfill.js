@@ -1,11 +1,13 @@
-import path from 'path';
-import replace from 'replace-in-file';
-import addRazzleMod from '../services/addRazzleMod';
-import log from '../services/log';
-import run from '../services/run';
 import chalk from 'chalk';
 import promisify from 'es6-promisify';
 import fs from 'fs';
+import path from 'path';
+import replace from 'replace-in-file';
+import { GENERATOR_TYPES } from '../constants';
+import { store } from '../createStore';
+import addRazzleMod from '../services/addRazzleMod';
+import log from '../services/log';
+import run from '../services/run';
 
 const rm = promisify(fs.unlink);
 
@@ -17,30 +19,28 @@ export default {
 };
 
 export const execute = async ({ answer, answers: { ssr, appname, eslintConfig }, packages }) => {
-    if (answer) {
-        if (ssr) {
-            packages.push('oberon-razzle-modifications');
-            await addRazzleMod(appname);
-            await replace({
-                from: /const usePolyfill = false;/,
-                to: 'const usePolyfill = true;',
-                files: path.join(process.cwd(), appname, 'razzle.config.js'),
+    const { generator } = store.getState();
+    if (generator === GENERATOR_TYPES.razzle) {
+        packages.push('oberon-razzle-modifications');
+        await addRazzleMod(appname);
+        await replace({
+            from: /const usePolyfill = false;/,
+            to: 'const usePolyfill = true;',
+            files: path.join(process.cwd(), appname, 'razzle.config.js'),
+        });
+    } else {
+        if (eslintConfig === 'react-app') {
+            log(chalk`You indicated that you wanted to use {dim babel-polyfill} instead of the default polyfill. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
+            await run('npm run eject', {
+                cwd: path.join(process.cwd(), appname),
             });
-        } else {
-            if (eslintConfig === 'react-app') {
-                log(chalk`You indicated that you wanted to use {dim babel-polyfill} instead of the default polyfill. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
-                await run('npm run eject', {
-                    cwd: path.join(process.cwd(), appname),
-                });
-            }
-            await replace({
-                from: /require\.resolve\('.\/polyfills'\)/g,
-                to: 'require.resolve(\'babel-polyfill\')',
-                files: ['webpack.config.dev.js', 'webpack.config.prod.js'].map(config => path.join(process.cwd(), appname, 'config', config)),
-            });
-            await rm(path.join(process.cwd(), appname, 'config', 'polyfills.js'));
         }
-
-        packages.push('babel-polyfill');
+        await replace({
+            from: /require\.resolve\('.\/polyfills'\)/g,
+            to: 'require.resolve(\'babel-polyfill\')',
+            files: ['webpack.config.dev.js', 'webpack.config.prod.js'].map(config => path.join(process.cwd(), appname, 'config', config)),
+        });
+        await rm(path.join(process.cwd(), appname, 'config', 'polyfills.js'));
     }
+    packages.push('babel-polyfill');
 };

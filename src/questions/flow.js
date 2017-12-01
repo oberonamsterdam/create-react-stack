@@ -1,9 +1,9 @@
-import run from '../services/run';
-import path from 'path';
-import inquirer from 'inquirer';
 import chalk from 'chalk';
 import promisify from 'es6-promisify';
 import fs from 'fs';
+import inquirer from 'inquirer';
+import path from 'path';
+import run from '../services/run';
 
 const rm = promisify(fs.unlink);
 
@@ -14,9 +14,7 @@ export default {
 };
 
 export const execute = async ({ answer, devPackages }) => {
-    if (answer) {
-        devPackages.push('flow-bin');
-    }
+    devPackages.push('flow-bin');
 };
 
 export const postInstall = async ({ answer, answers: { appname, mobile } }) => {

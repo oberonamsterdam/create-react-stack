@@ -8,7 +8,7 @@ import cmd from 'node-cmd';
 import path from 'path';
 import Rx from 'rx';
 import _package from '../package.json';
-import store from './createStore';
+import { store } from './createStore';
 import questions from './questions';
 import { postInstall } from './questions/index';
 import log from './services/log';
@@ -71,9 +71,69 @@ Please specify a name now:`,
     const answers = await new Promise((resolve, reject) => {
         const answers = {};
         const onNext = ({ name, answer }) => {
-            // TODO check for alphanumeric values in appname, add validate to question
+            const state = store.getState();
+            // means we have an error and should quit process
+            if (state.error.length > 0) {
+                prompts.onError(state.error);
+            }
             answers[name] = answer;
             i++;
+
+            /*
+            * question conditions / assumptions:
+            *
+            * eslint.js:
+            * - // CRA & razzle already include eslint by default
+            * - when: ({ mobile }) => mobile,
+            * - shows on mobile
+            * - checks if has answer
+            *
+            * eslint-config.js
+            * - doesn't check if theres no eslint that it should return null anyway
+            * - assumes default answer from reduxSsr && !flow, see default in default export
+            * - assumes we're on create-react-app
+            * - assumes we're on razzle later on
+            * - doesn't check for answer (BAD!)
+            * - runs eslint fix on postInstall, otherwise spams out auto fix (is this really necessary?)
+            *
+            * flow.js
+            * - checks if has answer
+            * - runs flowTyped on postInstall if user says yes
+            *
+            * mobile.js
+            * - checks if has answer
+            * - TODO react native hates hyphens i.e my-app. fix for this?
+            * - TODO currently the setup fails if appname is not alphanumeric (i.e camelCased)
+            *
+            * polyfill.js
+            * - doesn't show if on mobile
+            * - checks if has answer
+            * - assumes we're on razzle if reduxSsr, pushes oberon-razzle-modifications (why?)
+            * - else assumes we're on create react app
+            *
+            * redux.js
+            * - checks if has answer
+            * - assumes that if not mobile we're on web
+            *   - assumes that we're using razzle if reduxSsr
+            *   - assumes we're using create react app otherwise
+            * - does some dangerous injecting of code
+            * - does some regex to replace template name with appname
+            *
+            * redux-persist.js
+            * - doesn't show if redux is not chosen
+            * - checks if not has answer, then removes the section with crs-with-persist-start, since the user
+            *   didn't want redux-persist
+            * - else if has answer removes the section with crs-without-persist-start and pushes redux-persist to packages
+            *
+            * reduxSsr.js
+            * - shows if !mobile
+            * - for some reason checks inside question if mobile aswell
+            * - assumes that if not answer we're using create-react-app (I think?)
+            *
+            * styled-components.js
+            * - checks if has answer
+            * */
+
             if (questionsArray[i]) {
                 const arr = store.getState().answers;
                 arr.push({ [name]: answer });
@@ -95,7 +155,6 @@ Please specify a name now:`,
             }
         };
         const onError = (err) => {
-            console.log('onError');
             reject(err);
         };
         const onExit = () => {
@@ -120,6 +179,19 @@ Please specify a name now:`,
     const devPackages = [];
     for (const key of Object.keys(questions)) {
         const question = questions[key];
+        let validExecute;
+        if (question.requirements.length > 0) {
+            validExecute = question.requirements.filter(requirement => {
+                if (typeof requirement.condition === 'function') {
+                    return requirement.condition({ answers: answers, answer: answers[key] });
+                } else {
+                    return requirement.condition;
+                }
+            });
+            if (validExecute.length > 0) {
+                continue;
+            }
+        }
         await question.execute({ answer: answers[key], answers, packages, devPackages });
     }
 

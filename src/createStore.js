@@ -1,10 +1,10 @@
 import createStore from './store';
 
 const defaultState = {
-    createReactAppEjected: false,
+    generator: '',
+    ejected: false,
+    error: '',
     answers: [],
 };
 
-const store = createStore(defaultState);
-
-export default store;
+export const store = createStore(defaultState);

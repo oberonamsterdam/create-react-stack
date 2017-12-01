@@ -2,7 +2,10 @@ import fs from 'fs-extra';
 import globby from 'globby';
 import path from 'path';
 import replace from 'replace-in-file';
+import { GENERATOR_TYPES } from '../constants';
+import { store } from '../createStore';
 import log from '../services/log';
+import { reduxNoSsr, reduxSsr } from '../snippets';
 
 export default {
     type: 'confirm',
@@ -11,72 +14,41 @@ export default {
 };
 
 export const execute = async ({ answer, answers: { appname, ssr, flow, mobile }, packages }) => {
+    const { generator } = store.getState();
+    const { reactNativeCli, razzle, createReactApp } = GENERATOR_TYPES;
     if (answer) {
         packages.push('redux', 'react-redux');
     }
 
-    if (answer && !mobile) {
+    if (answer && generator !== reactNativeCli) {
         const template = path.resolve(path.join(__dirname, '..', 'templates', 'web-with-redux', 'src'));
         const src = path.join(process.cwd(), appname, 'src');
 
-        if (ssr) {
+        if (generator === razzle) {
             packages.push('serialize-javascript');
 
             await replace({
-                from: [
-                    /const context = {};/gm,
-                    /<script src="\${assets\.client\.js}" defer><\/script>/gm,
-                    /import React from 'react';/gm,
-                    /<App \/>/gm,
-                    /\.get\('\/\*', \(/g,
-                ],
-                to: [
-                    `const context = {};
-        const store = await createStore();`,
-                    `<script>window.__initialState = \${serialize(store.getState())};</script>
-<script src="\${assets.client.js}" defer></script>`,
-                    `import React from 'react';
-import createStore from './createStore';
-import serialize from 'serialize-javascript';`,
-                    '<App store={store} />',
-                    '.get(\'/*\', async (',
-                ],
+                from: reduxSsr.server.from,
+                to: reduxSsr.server.to,
                 files: path.join(process.cwd(), appname, 'src', 'server.js'),
             });
 
             await replace({
-                from: [
-                    /\nrender/g,
-                    /<App \/>/g,
-                    /\s$/g,
-                ],
-                to: [
-                    'import createStore from \'./createStore\';\n\ncreateStore(window.__initialState).then(store => {\nrender',
-                    '<App store={store} />',
-                    '\n});',
-                ],
+                from: reduxSsr.client.from,
+                to: reduxSsr.client.to,
                 files: path.join(process.cwd(), appname, 'src', 'client.js'),
             });
 
             await fs.copy(path.join(template, 'components', `App${flow ? '-with-flow' : ''}.js`), path.join(src, 'components', 'App.js'));
-        } else {
+        } else if (generator === createReactApp) {
             await replace({
-                from: [
-                    /<App \/>/g,
-                    /\nReactDOM/g,
-                    /registerServiceWorker\(\)/g,
-                ],
-                to: [
-                    '<Provider store={store}><App /></Provider>',
-                    'import createStore from \'./createStore\';\nimport { Provider } from \'react-redux\';\n\ncreateStore(window.__initialState).then(store => {\nReactDOM',
-                    '});\nregisterServiceWorker()',
-                ],
+                from: reduxNoSsr.index.from,
+                to: reduxNoSsr.index.from,
                 files: path.join(process.cwd(), appname, 'src', 'index.js'),
             });
         }
-
         await fs.copy(path.join(template, 'createStore.js'), path.join(src, 'createStore.js'));
-    } else if (mobile) {
+    } else if (generator === reactNativeCli) {
         const template = path.join(__dirname, '..', 'templates', 'react-native', answer ? 'with-redux' : 'without-redux');
         const appDir = path.join(process.cwd(), appname);
         const files = await globby(path.join(template, '**/*.js'));

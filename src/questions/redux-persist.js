@@ -9,9 +9,6 @@ export default {
 };
 
 export const execute = async ({ answer, answers: { appname, redux }, packages }) => {
-    if (!redux) {
-        return;
-    }
 
     let stripSection;
     if (!answer) {

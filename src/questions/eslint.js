@@ -10,13 +10,11 @@ export default {
     when: ({ mobile }) => mobile,
 };
 
-export const execute = async ({ answer, devPackages }) => {
-    if (answer) {
-        devPackages.push('eslint');
-    }
+export const execute = async ({ devPackages }) => {
+    devPackages.push('eslint');
 };
 
-export const postInstall = ({answer}) => {
+export const postInstall = ({ answer }) => {
     if (answer) {
         log(chalk`ESLint has been installed, but will still need to be configured in your IDE.`, 'warn');
         log(chalk`Configure it or run {dim npx eslint .} manually to get linter output.`, 'warn');

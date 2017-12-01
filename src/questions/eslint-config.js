@@ -4,7 +4,8 @@ import fs from 'fs';
 import cmd from 'node-cmd';
 import path from 'path';
 import replace from 'replace-in-file';
-import store from '../createStore';
+import { GENERATOR_TYPES } from '../constants';
+import { store } from '../createStore';
 import log from '../services/log';
 import run from '../services/run';
 
@@ -27,10 +28,11 @@ export default {
 };
 
 export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint }, devPackages }) => {
-    if (mobile && !eslint) {
-        return;
-    }
+    // check if we're on mobile and if eslint is disabled
+    // shouldnt we return null if theres no eslint aswell? (no because razzle & create-react-app come with eslint
+    const { generator } = store.getState();
 
+    // this checks if the config has peerDeps and adds them to the devPackages queue
     if ((answer !== 'react-app' && !mobile) || (mobile && eslint)) {
         devPackages.push(`eslint-config-${answer}`);
         const res = await get(`npm info "eslint-config-${answer}@latest" peerDependencies --json`);
@@ -38,7 +40,8 @@ export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint 
         devPackages.push(...Object.keys(peerDeps).map(key => `${key}@${peerDeps[key]}`));
     }
 
-    if (answer !== 'react-app' && !ssr && !mobile) {
+    // this makes the assumption we're on create-react-app!
+    if (answer !== 'react-app' && generator === GENERATOR_TYPES.createReactApp) {
         // eject if we're on create-react-app.
         log(chalk`You indicated a different config than {dim react-app}. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
 
@@ -57,7 +60,8 @@ export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint 
         });
     }
 
-    if ((answer !== 'react-app' && ssr) || (mobile && eslint)) {
+    // this assumes we're on razzle in the first condition
+    if ((answer !== 'react-app' && generator === GENERATOR_TYPES.razzle) || (mobile && eslint)) {
         await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
 {
     "extends": "${answer}"
