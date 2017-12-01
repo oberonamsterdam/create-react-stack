@@ -1,5 +1,3 @@
-import { GENERATOR_TYPES } from '../constants';
-import { store } from '../createStore';
 import run from '../services/run';
 
 export default {
@@ -9,8 +7,8 @@ export default {
 };
 
 export const execute = async ({ answers: { appname } }) => {
-    store.changeState({
-        generator: GENERATOR_TYPES.reactNativeCli,
-    });
+    // store.changeState({
+    //     generator: GENERATOR_TYPES.reactNativeCli,
+    // });
     await run(`npx react-native-cli init ${appname}`);
 };

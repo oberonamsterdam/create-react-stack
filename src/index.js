@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 
 import chalk from 'chalk';
+import check from 'check-types';
 import program from 'commander';
 import promisify from 'es6-promisify';
 import inquirer from 'inquirer';
@@ -8,7 +9,7 @@ import cmd from 'node-cmd';
 import path from 'path';
 import Rx from 'rx';
 import _package from '../package.json';
-import { QUESTION_TYPES } from './constants';
+import { GENERATOR_TYPES, QUESTION_TYPES } from './constants';
 import { store } from './createStore';
 import questions from './questions';
 import { postInstall } from './questions/index';
@@ -84,9 +85,9 @@ Please specify a name now:`,
             if (state.error.length > 0) {
                 prompts.onError(state.error);
             }
-            answers[name] = answer;
             i++;
 
+            answers[name] = answer;
             /*
             * question conditions / assumptions:
             *
@@ -142,6 +143,41 @@ Please specify a name now:`,
             * - checks if has answer
             * */
 
+            /*
+            * Determine generator
+            * */
+            const { expo, createReactApp, reactNativeCli, razzle } = GENERATOR_TYPES;
+            const mobileAnswer = answers.mobile;
+            const ssrAnswer = answers.ssr;
+            if (!check.assigned(ssrAnswer) && mobileAnswer) {
+                const expoAnswer = answers.mobile;
+                if (expoAnswer === true) {
+                    // if expo
+                    store.changeState({
+                        generator: expo,
+                    });
+                }
+                if (expoAnswer === false) {
+                    // if react-native-cli
+                    store.changeState({
+                        generator: reactNativeCli,
+                    });
+                }
+            } else if (check.assigned(ssrAnswer) && !mobileAnswer) {
+                if (ssrAnswer === true) {
+                    // if razzle
+                    store.changeState({
+                        generator: razzle,
+                    });
+                }
+                if (ssrAnswer === false) {
+                    // if create-react-app
+                    store.changeState({
+                        generator: createReactApp,
+                    });
+                }
+            }
+
             if (questionsArray[i]) {
                 const arr = store.getState().answers;
                 arr.push({ [name]: answer });
@@ -150,6 +186,8 @@ Please specify a name now:`,
                 });
                 const fun = questionsArray[i].question.when;
                 if (typeof fun === 'function') {
+                    // TODO implement generators check in question/index.js
+                    // TODO implement generators logic in src/index.js
                     const willNotSkip = questionsArray[i].question.when(answers);
                     if (!willNotSkip) {
                         i++;
@@ -183,8 +221,6 @@ Please specify a name now:`,
 
     log(chalk`🍳  Cooking up a fresh new app...`);
 
-    // TODO Currently storing snippets in snippets.js breaks the replace
-    // TODO investigate.
     const packages = [];
     const devPackages = [];
     for (const key of Object.keys(questions)) {

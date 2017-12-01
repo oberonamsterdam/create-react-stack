@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 import replace from 'replace-in-file';
 import { GENERATOR_TYPES } from '../constants';
-import { store } from '../createStore';
 import run from '../services/run';
 
 const mv = promisify(fs.rename, { multiArgs: true });
@@ -19,9 +18,9 @@ export default {
 export const execute = async ({ answer, answers: { appname } }) => {
     const { createReactApp, razzle } = GENERATOR_TYPES;
     const generator = answer ? razzle : createReactApp;
-    store.changeState({
-        generator: generator,
-    });
+    // store.changeState({
+    //     generator: generator,
+    // });
 
     await run(`npx ${generator} ${appname}`);
 

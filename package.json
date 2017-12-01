@@ -16,6 +16,7 @@
     "dependencies": {
         "backpack-core": "^0.4.2",
         "chalk": "^2.1.0",
+        "check-types": "^7.3.0",
         "commander": "^2.11.0",
         "es6-promisify": "^5.0.0",
         "fs-extra": "^4.0.1",
