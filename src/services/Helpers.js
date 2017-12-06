@@ -9,3 +9,22 @@ export const checkForValidAppname = (appname) => {
         });
     }
 };
+
+export const validateQuestion = ({question, answers, answer}) => {
+    let invalidExecute;
+    if (question.requirements.length > 0) {
+        invalidExecute = question.requirements.filter(requirement => {
+            if (typeof requirement.condition === 'function') {
+                return !requirement.condition({
+                    answers: answers,
+                    answer: answers[key],
+                });
+            } else {
+                return !requirement.condition;
+            }
+        });
+        return invalidExecute.length <= 0;
+    } else {
+        return true;
+    }
+};

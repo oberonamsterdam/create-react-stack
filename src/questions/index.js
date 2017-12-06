@@ -1,4 +1,4 @@
-import { QUESTION_TYPES } from '../constants';
+import { GENERATOR_TYPES, QUESTION_TYPES } from '../constants';
 import eslintQuestion, { execute as executeEslint } from './eslint';
 import eslintConfigQuestion, {
     execute as executeEslintConfig,
@@ -26,6 +26,18 @@ const {
     expo,
 } = QUESTION_TYPES;
 
+const {
+    createReactApp,
+    razzle,
+    reactNativeCli,
+} = GENERATOR_TYPES;
+const expoGeneratorType = GENERATOR_TYPES.expo;
+
+const generators = {
+    all: [createReactApp, reactNativeCli, razzle, expoGeneratorType],
+    notExpo: [createReactApp, razzle, reactNativeCli],
+};
+
 // requirements are for skipping exec functions of questions.
 // condition should return true if should exist
 // generators are to say which generators are supported by this question.
@@ -35,6 +47,7 @@ export default {
         question: mobileQuestion,
         execute: executeMobile,
         type: mobile,
+        generators: generators.all,
         requirements: [
             {
                 condition: ({ answer }) => !!answer,
@@ -45,6 +58,7 @@ export default {
         question: expoQuestion,
         execute: executeExpo,
         type: expo,
+        generators: generators.all,
         requirements: [
             {
                 condition: ({ answers: { mobile } }) => !!mobile,
@@ -55,6 +69,7 @@ export default {
         question: ssrQuestion,
         execute: executeSSR,
         type: ssr,
+        generators: generators.all,
         requirements: [
             {
                 condition: ({ mobile }) => !mobile,
@@ -65,6 +80,7 @@ export default {
         question: flowQuestion,
         execute: executeFlow,
         type: flow,
+        generators: generators.notExpo,
         requirements: [
             {
                 condition: ({ answer }) => !!answer,
@@ -75,12 +91,14 @@ export default {
         question: reduxQuestion,
         execute: executeRedux,
         type: redux,
+        generators: generators.notExpo,
         requirements: [],
     },
     reduxPersist: {
         question: reduxPersistQuestion,
         execute: executeReduxPersist,
         type: reduxPersist,
+        generators: generators.notExpo,
         requirements: [
             {
                 condition: ({ answers: { redux } }) => redux,
@@ -91,6 +109,7 @@ export default {
         question: eslintQuestion,
         execute: executeEslint,
         type: eslint,
+        generators: generators.notExpo,
         requirements: [
             {
                 condition: ({ answer }) => !!answer,
@@ -101,6 +120,7 @@ export default {
         question: eslintConfigQuestion,
         execute: executeEslintConfig,
         type: eslintConfig,
+        generators: generators.notExpo,
         requirements: [
             {
                 condition: ({ answers: { mobile, eslint } }) => !(mobile && !eslint),
@@ -111,6 +131,7 @@ export default {
         question: polyfillQuestion,
         execute: executePolyfill,
         type: polyfill,
+        generators: generators.notExpo,
         requirements: [
             {
                 condition: ({ answer, answers: { mobile } }) => {
@@ -123,6 +144,7 @@ export default {
         question: styledComponentsQuestion,
         execute: executeStyledComponents,
         type: styledComponents,
+        generators: generators.notExpo,
         requirements: [
             {
                 condition: ({ answer }) => !!answer,

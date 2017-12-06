@@ -13,7 +13,7 @@ import { GENERATOR_TYPES, QUESTION_TYPES } from './constants';
 import { store } from './createStore';
 import questions from './questions';
 import { postInstall } from './questions/index';
-import { checkForValidAppname } from './services/Helpers';
+import { checkForValidAppname, validateQuestion } from './services/Helpers';
 import log from './services/log';
 import run from './services/run';
 
@@ -184,17 +184,33 @@ Please specify a name now:`,
                 store.changeState({
                     answers: arr,
                 });
-                const fun = questionsArray[i].question.when;
-                if (typeof fun === 'function') {
-                    // TODO implement generators check in question/index.js
-                    // TODO implement generators logic in src/index.js
-                    const willNotSkip = questionsArray[i].question.when(answers);
-                    if (!willNotSkip) {
-                        i++;
+
+                // validate?!
+
+                const generatorQuestions = [QUESTION_TYPES.mobile, QUESTION_TYPES.expo, QUESTION_TYPES.ssr];
+
+                if (!generatorQuestions.includes(questionsArray[i].type)) {
+                    const validQuestion = validateQuestion({
+                        answers: answers,
+                        answer: answer,
+                        question: questionsArray[i],
+                    });
+
+                    if (validQuestion === false) {
+                        // we have to filter through all the questions
+                        // filter by questions types in answers keys
+                        // so filter the questions that are already answered basically.
+                        // then start with i = 0, go through remaining questions, check requirement condition
+                        // skip and filter question if requirement is not met, then afterwards return new array
+                        // including the remaining questions which will be used on next question.
+                        // hope you understand this future me!
                     }
+                }
+
+                if (questionsArray[i]) {
                     prompts.onNext(questionsArray[i].question);
                 } else {
-                    prompts.onNext(questionsArray[i].question);
+                    prompts.onCompleted();
                 }
             } else {
                 prompts.onCompleted();
@@ -228,21 +244,15 @@ Please specify a name now:`,
             continue;
         }
         const question = questions[key];
-        let invalidExecute;
-        if (question.requirements.length > 0) {
-            invalidExecute = question.requirements.filter(requirement => {
-                if (typeof requirement.condition === 'function') {
-                    return !requirement.condition({
-                        answers: answers,
-                        answer: answers[key],
-                    });
-                } else {
-                    return !requirement.condition;
-                }
-            });
-            if (invalidExecute.length > 0) {
-                continue;
-            }
+
+        const validQuestion = validateQuestion({
+            answers: answers,
+            answer: answers[key],
+            question: question,
+        });
+
+        if (validQuestion === false) {
+            continue;
         }
         await question.execute({ answer: answers[key], answers, packages, devPackages });
     }
