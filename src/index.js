@@ -203,7 +203,6 @@ Please specify a name now:`,
                         // then start with i = 0, go through remaining questions, check requirement condition
                         // skip and filter question if requirement is not met, then afterwards return new array
                         // including the remaining questions which will be used on next question.
-                        // hope you understand this future me!
                     }
                 }
 
