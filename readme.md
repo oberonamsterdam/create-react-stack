@@ -38,3 +38,6 @@ yarn create react-stack my-awesome-app
 - 💅  [styled-components](http://styled-components.com)
 - 🌊  [flowtype](https://flowtype.org)  
     - Will ask you to run flow-typed after project setup so you won't forget 😎
+    
+## development
+see [development enviroment](dev.md) readme
