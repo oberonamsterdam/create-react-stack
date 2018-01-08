@@ -13,11 +13,7 @@
 
 class Store {
     constructor (defaultState) {
-        if (defaultState) {
-            this.state = defaultState;
-        } else {
-            this.state = {};
-        }
+        this.state = defaultState;
     }
 
     getState () {
@@ -29,10 +25,6 @@ class Store {
             ...this.state,
             ...payload,
         };
-    }
-
-    dispatch (action) {
-
     }
 }
 

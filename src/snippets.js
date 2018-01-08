@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 export const reduxSsr = {
     server: {
         from: [
@@ -54,4 +56,5 @@ wrong: my-awesome-app
 good: myAwesomeApp
 
 Please re-run CRS with an alphanumeric-only appname.`,
+    ejectCRA: chalk`You indicated that you wanted to use {dim babel-polyfill} instead of the default polyfill. This requires ejecting from {dim create-react-app}, it will prompt you now.`,
 };

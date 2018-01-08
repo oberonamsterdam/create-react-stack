@@ -1,3 +1,5 @@
+import { GENERATOR_TYPES } from '../constants';
+import { store } from '../createStore';
 import run from '../services/run';
 
 export default {
@@ -7,5 +9,9 @@ export default {
     when: ({ mobile }) => mobile,
 };
 export const execute = async ({ answers: { appname } }) => {
-    await run(`npx create-react-native-app ${appname}`);
+    const currentGenerator = store.getState().generator;
+
+    if (currentGenerator === GENERATOR_TYPES.expo) {
+        await run(`npx create-react-native-app ${appname}`);
+    }
 };

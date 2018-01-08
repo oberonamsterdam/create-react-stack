@@ -30,8 +30,8 @@ const {
     createReactApp,
     razzle,
     reactNativeCli,
+    expo: expoGeneratorType,
 } = GENERATOR_TYPES;
-const expoGeneratorType = GENERATOR_TYPES.expo;
 
 const generators = {
     all: [createReactApp, reactNativeCli, razzle, expoGeneratorType],

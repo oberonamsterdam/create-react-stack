@@ -1,11 +1,11 @@
 import check from 'check-types';
-import validator from 'validator';
 import { GENERATOR_TYPES } from '../constants';
 import { store } from '../createStore';
 import { errors } from '../snippets';
 
 export const checkForValidAppname = (appname) => {
-    if (!validator.isAlphanumeric(appname)) {
+    const regex = /^\w+$/g;
+    if (!regex.test(appname)) {
         store.changeState({
             error: errors.mobileNotAlphanumeric,
         });

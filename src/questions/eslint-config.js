@@ -8,6 +8,7 @@ import { GENERATOR_TYPES } from '../constants';
 import { store } from '../createStore';
 import log from '../services/log';
 import run from '../services/run';
+import { errors } from '../snippets';
 
 const writeFile = promisify(fs.writeFile);
 const get = promisify(cmd.get, {
@@ -28,45 +29,44 @@ export default {
 };
 
 export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint }, devPackages }) => {
-    // check if we're on mobile and if eslint is disabled
-    // shouldnt we return null if theres no eslint aswell? (no because razzle & create-react-app come with eslint
+    const { razzle, createReactApp, expo, reactNativeCli } = GENERATOR_TYPES;
     const { generator } = store.getState();
 
-    // this checks if the config has peerDeps and adds them to the devPackages queue
-    if ((answer !== 'react-app' && !mobile) || (mobile && eslint)) {
-        devPackages.push(`eslint-config-${answer}`);
-        const res = await get(`npm info "eslint-config-${answer}@latest" peerDependencies --json`);
-        const peerDeps = JSON.parse(res[0]);
-        devPackages.push(...Object.keys(peerDeps).map(key => `${key}@${peerDeps[key]}`));
-    }
+    if (answer !== 'react-app') {
+        if (!mobile || (mobile && eslint)) {
+            devPackages.push(`eslint-config-${answer}`);
+            const res = await get(`npm info "eslint-config-${answer}@latest" peerDependencies --json`);
+            const peerDeps = JSON.parse(res[0]);
+            devPackages.push(...Object.keys(peerDeps).map(key => `${key}@${peerDeps[key]}`));
+        }
 
-    // this makes the assumption we're on create-react-app!
-    if (answer !== 'react-app' && generator === GENERATOR_TYPES.createReactApp) {
-        // eject if we're on create-react-app.
-        log(chalk`You indicated a different config than {dim react-app}. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
+        if (generator === createReactApp) {
+            // eject if we're on create-react-app.
+            log(errors.ejectCRA, 'warn');
 
-        // update global state
-        store.changeState({
-            createReactAppEjected: true,
-        });
+            // update global state
+            store.changeState({
+                createReactAppEjected: true,
+            });
 
-        await run('npm run eject', {
-            cwd: path.join(process.cwd(), appname),
-        });
-        await replace({
-            files: path.join(process.cwd(), appname, 'package.json'),
-            from: /"extends": "react-app"/g,
-            to: `"extends": "${answer}"`,
-        });
-    }
+            await run('npm run eject', {
+                cwd: path.join(process.cwd(), appname),
+            });
+            await replace({
+                files: path.join(process.cwd(), appname, 'package.json'),
+                from: /"extends": "react-app"/g,
+                to: `"extends": "${answer}"`,
+            });
+        }
 
-    // this assumes we're on razzle in the first condition
-    if ((answer !== 'react-app' && generator === GENERATOR_TYPES.razzle) || (mobile && eslint)) {
-        await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
+        // this assumes we're on razzle in the first condition
+        if (generator === razzle || (mobile && eslint)) {
+            await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
 {
     "extends": "${answer}"
 }
 `);
+        }
     }
 };
 

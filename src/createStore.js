@@ -5,7 +5,7 @@ const defaultState = {
     generator: GENERATOR_TYPES.createReactApp,
     ejected: false,
     error: '',
-    answers: [],
+    answers: {},
 };
 
 export const store = createStore(defaultState);

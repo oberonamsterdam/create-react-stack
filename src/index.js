@@ -74,8 +74,9 @@ Please specify a name now:`,
     const prompts = new Rx.Subject();
 
     const answers = await new Promise((resolve, reject) => {
-        const answers = {};
+        let answers = store.getState().answers;
         const onNext = async ({ name, answer }) => {
+            answers = store.getState().answers;
             // TODO clean this up, this is for mobile to check if the appname is valid
             // TODO because of react-native-cli's policy on alphanumeric only appnames.
             if (name === QUESTION_TYPES.mobile && answer === true) {
@@ -87,7 +88,12 @@ Please specify a name now:`,
             if (state.error.length > 0) {
                 prompts.onError(state.error);
             }
-            answers[name] = answer;
+            store.changeState({
+                answers: {
+                    ...store.getState().answers,
+                    [name]: answer,
+                },
+            });
             questionIndex++;
 
             updateGenerator(answers);

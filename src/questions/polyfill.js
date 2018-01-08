@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import promisify from 'es6-promisify';
 import fs from 'fs';
 import path from 'path';
@@ -8,6 +7,7 @@ import { store } from '../createStore';
 import addRazzleMod from '../services/addRazzleMod';
 import log from '../services/log';
 import run from '../services/run';
+import { errors } from '../snippets';
 
 const rm = promisify(fs.unlink);
 
@@ -33,7 +33,7 @@ export const execute = async ({ answer, answers: { ssr, appname, eslintConfig },
         });
     } else {
         if (eslintConfig === 'react-app') {
-            log(chalk`You indicated that you wanted to use {dim babel-polyfill} instead of the default polyfill. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
+            log(errors.ejectCRA, 'warn');
             await run('npm run eject', {
                 cwd: path.join(process.cwd(), appname),
             });
