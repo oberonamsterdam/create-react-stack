@@ -17,6 +17,7 @@ export default (command, options = {}) => {
         });
 
         child.on('close', (code) => {
+            console.log(command);
             if (code !== 0) {
                 reject(new Error(`Process ${cmd} exited with code ${code}`));
             } else {

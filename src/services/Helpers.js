@@ -1,4 +1,6 @@
+import check from 'check-types';
 import validator from 'validator';
+import { GENERATOR_TYPES } from '../constants';
 import { store } from '../createStore';
 import { errors } from '../snippets';
 
@@ -10,21 +12,41 @@ export const checkForValidAppname = (appname) => {
     }
 };
 
-export const validateQuestion = ({ question, answers, answer }) => {
-    let invalidExecute;
-    if (question.requirements.length > 0) {
-        invalidExecute = question.requirements.filter(requirement => {
-            if (typeof requirement.condition === 'function') {
-                return !requirement.condition({
-                    answers: answers,
-                    answer: answer,
-                });
-            } else {
-                return !requirement.condition;
-            }
-        });
-        return invalidExecute.length <= 0;
+export const updateGenerator = (answers) => {
+    const { expo, createReactApp, reactNativeCli, razzle } = GENERATOR_TYPES;
+    const mobileAnswer = answers.mobile;
+    const webAnswer = answers.reduxSsr;
+
+    // if mobile
+    if (!check.assigned(webAnswer) && mobileAnswer) {
+        const expoAnswer = answers.expo;
+        if (expoAnswer === true) {
+            // if expo
+            store.changeState({
+                generator: expo,
+            });
+        }
+        if (expoAnswer === false) {
+            // if react-native-cli
+            store.changeState({
+                generator: reactNativeCli,
+            });
+        }
+        // if web
+    } else if (check.assigned(webAnswer) && !mobileAnswer) {
+        if (webAnswer === true) {
+            // if razzle
+            store.changeState({
+                generator: razzle,
+            });
+        }
+        if (webAnswer === false) {
+            // if create-react-app
+            store.changeState({
+                generator: createReactApp,
+            });
+        }
     } else {
-        return true;
+        // could not determine generator
     }
 };

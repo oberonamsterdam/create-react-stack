@@ -6,9 +6,8 @@ export default {
     message: 'Are you building a mobile project? (https://facebook.github.io/react-native/)',
 };
 
-export const execute = async ({ answers: { appname } }) => {
-    // store.changeState({
-    //     generator: GENERATOR_TYPES.reactNativeCli,
-    // });
-    await run(`npx react-native-cli init ${appname}`);
+export const execute = async ({ answers: { appname, expo } }) => {
+    if (!expo) {
+        await run(`npx react-native-cli init ${appname}`);
+    }
 };

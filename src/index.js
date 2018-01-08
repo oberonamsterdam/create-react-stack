@@ -9,11 +9,11 @@ import cmd from 'node-cmd';
 import path from 'path';
 import Rx from 'rx';
 import _package from '../package.json';
-import { GENERATOR_TYPES, QUESTION_TYPES } from './constants';
+import { QUESTION_TYPES } from './constants';
 import { store } from './createStore';
 import questions from './questions';
 import { postInstall } from './questions/index';
-import { checkForValidAppname, validateQuestion } from './services/Helpers';
+import { checkForValidAppname, getQuestion, updateGenerator } from './services/Helpers';
 import log from './services/log';
 import run from './services/run';
 
@@ -21,6 +21,9 @@ const get = promisify(cmd.get, {
     thisArg: cmd,
     multiArgs: true,
 });
+
+export let questionsArray = Object.keys(questions).map((key) => questions[key]);
+let questionIndex = 0;
 
 (async () => {
     log(chalk`{blue v${_package.version}}`);
@@ -49,11 +52,11 @@ const get = promisify(cmd.get, {
     }
 
     const appname = program.args[0];
-    let questionsArray = Object.keys(questions).map((key) => questions[key]);
 
     if (!appname) {
         questionsArray = [
             {
+                type: QUESTION_TYPES.appname,
                 question: {
                     message: chalk`You didn't provide a directory for the app to be created in.
 Remember, you can run CRS as follows: {dim create-react-stack my-awesome-app}
@@ -69,11 +72,10 @@ Please specify a name now:`,
     log('📋  Please choose your stack:');
 
     const prompts = new Rx.Subject();
-    let i = 0;
 
     const answers = await new Promise((resolve, reject) => {
         const answers = {};
-        const onNext = ({ name, answer }) => {
+        const onNext = async ({ name, answer }) => {
             // TODO clean this up, this is for mobile to check if the appname is valid
             // TODO because of react-native-cli's policy on alphanumeric only appnames.
             if (name === QUESTION_TYPES.mobile && answer === true) {
@@ -85,134 +87,40 @@ Please specify a name now:`,
             if (state.error.length > 0) {
                 prompts.onError(state.error);
             }
-            i++;
-
             answers[name] = answer;
-            /*
-            * question conditions / assumptions:
-            *
-            * eslint.js:
-            * - // CRA & razzle already include eslint by default
-            * - when: ({ mobile }) => mobile,
-            * - shows on mobile
-            * - checks if has answer
-            *
-            * eslint-config.js
-            * - doesn't check if theres no eslint that it should return null anyway
-            * - assumes default answer from reduxSsr && !flow, see default in default export
-            * - assumes we're on create-react-app
-            * - assumes we're on razzle later on
-            * - doesn't check for answer (BAD!)
-            * - runs eslint fix on postInstall, otherwise spams out auto fix (is this really necessary?)
-            *
-            * flow.js
-            * - checks if has answer
-            * - runs flowTyped on postInstall if user says yes
-            *
-            * mobile.js
-            * - checks if has answer
-            * - TODO react native hates hyphens i.e my-app. fix for this?
-            * - TODO currently the setup fails if appname is not alphanumeric (i.e camelCased)
-            *
-            * polyfill.js
-            * - doesn't show if on mobile
-            * - checks if has answer
-            * - assumes we're on razzle if reduxSsr, pushes oberon-razzle-modifications (why?)
-            * - else assumes we're on create react app
-            *
-            * redux.js
-            * - checks if has answer
-            * - assumes that if not mobile we're on web
-            *   - assumes that we're using razzle if reduxSsr
-            *   - assumes we're using create react app otherwise
-            * - does some dangerous injecting of code
-            * - does some regex to replace template name with appname
-            *
-            * redux-persist.js
-            * - doesn't show if redux is not chosen
-            * - checks if not has answer, then removes the section with crs-with-persist-start, since the user
-            *   didn't want redux-persist
-            * - else if has answer removes the section with crs-without-persist-start and pushes redux-persist to packages
-            *
-            * reduxSsr.js
-            * - shows if !mobile
-            * - for some reason checks inside question if mobile aswell
-            * - assumes that if not answer we're using create-react-app (I think?)
-            *
-            * styled-components.js
-            * - checks if has answer
-            * */
+            questionIndex++;
 
-            /*
-            * Determine generator
-            * */
-            const { expo, createReactApp, reactNativeCli, razzle } = GENERATOR_TYPES;
-            const mobileAnswer = answers.mobile;
-            const ssrAnswer = answers.ssr;
-            if (!check.assigned(ssrAnswer) && mobileAnswer) {
-                const expoAnswer = answers.mobile;
-                if (expoAnswer === true) {
-                    // if expo
-                    store.changeState({
-                        generator: expo,
-                    });
+            updateGenerator(answers);
+
+            const traverseQuestions = () => {
+                const question = questionsArray[questionIndex];
+                const currentGenerator = store.getState().generator;
+                if (!check.assigned(question)) {
+                    return;
                 }
-                if (expoAnswer === false) {
-                    // if react-native-cli
-                    store.changeState({
-                        generator: reactNativeCli,
-                    });
-                }
-            } else if (check.assigned(ssrAnswer) && !mobileAnswer) {
-                if (ssrAnswer === true) {
-                    // if razzle
-                    store.changeState({
-                        generator: razzle,
-                    });
-                }
-                if (ssrAnswer === false) {
-                    // if create-react-app
-                    store.changeState({
-                        generator: createReactApp,
-                    });
-                }
-            }
-
-            if (questionsArray[i]) {
-                const arr = store.getState().answers;
-                arr.push({ [name]: answer });
-                store.changeState({
-                    answers: arr,
-                });
-
-                // validate?!
-
-                const generatorQuestions = [QUESTION_TYPES.mobile, QUESTION_TYPES.expo, QUESTION_TYPES.ssr];
-
-                if (!generatorQuestions.includes(questionsArray[i].type)) {
-                    const validQuestion = validateQuestion({
-                        answers: answers,
-                        answer: answer,
-                        question: questionsArray[i],
-                    });
-
-                    if (validQuestion === false) {
-                        // we have to filter through all the questions
-                        // filter by questions types in answers keys
-                        // so filter the questions that are already answered basically.
-                        // then start with i = 0, go through remaining questions, check requirement condition
-                        // skip and filter question if requirement is not met, then afterwards return new array
-                        // including the remaining questions which will be used on next question.
+                if (!question.generators.includes(currentGenerator)) {
+                    questionIndex++;
+                    return traverseQuestions();
+                } else if (typeof question.question.when === 'function') {
+                    const isValid = question.question.when(answers);
+                    if (isValid) {
+                        return question;
+                    } else if (!isValid) {
+                        questionIndex++;
+                        return traverseQuestions();
                     }
                 }
+                return question;
+            };
 
-                if (questionsArray[i]) {
-                    prompts.onNext(questionsArray[i].question);
-                } else {
-                    prompts.onCompleted();
-                }
+            const nextQuestion = traverseQuestions();
+
+            if (!check.assigned(nextQuestion) && !check.assigned(questionsArray[questionIndex + 1])) {
+                return prompts.onCompleted();
+            } else if (check.assigned(nextQuestion.question)) {
+                return prompts.onNext(nextQuestion.question);
             } else {
-                prompts.onCompleted();
+                return prompts.onError(nextQuestion.question);
             }
         };
         const onError = (err) => {
@@ -227,7 +135,7 @@ Please specify a name now:`,
             onError,
             onExit,
         );
-        prompts.onNext(questionsArray[0].question);
+        prompts.onNext(questionsArray[questionIndex].question);
     });
 
     if (!answers.appname) {
@@ -238,24 +146,20 @@ Please specify a name now:`,
 
     const packages = [];
     const devPackages = [];
-    for (const key of Object.keys(questions)) {
-        if (answers[key] === false) {
-            continue;
-        }
-        const question = questions[key];
 
-        const validQuestion = validateQuestion({
-            answers: answers,
-            answer: answers[key],
-            question: question,
-        });
-
-        if (validQuestion === false) {
-            continue;
+    // run exec of questions
+    for (const answerKey of Object.keys(answers)) {
+        const answer = answers[answerKey];
+        if (typeof answer === 'boolean' && answerKey !== QUESTION_TYPES.appname) {
+            if (answer === true) {
+                await questions[answerKey].execute({ answer: answer, answers, packages, devPackages });
+            }
+        } else if (answerKey !== QUESTION_TYPES.appname) {
+            await questions[answerKey].execute({ answer: answer, answers, packages, devPackages });
         }
-        await question.execute({ answer: answers[key], answers, packages, devPackages });
     }
 
+    // install packages
     if (packages.length) {
         console.log();
         console.log(chalk`Installing {bold.blue packages}:`);
@@ -268,6 +172,8 @@ Please specify a name now:`,
             cwd: path.join(process.cwd(), answers.appname),
         });
     }
+
+    // install dev packages
     if (devPackages.length) {
         console.log();
         console.log(chalk`Installing {bold.green dev packages}:`);

@@ -18,9 +18,6 @@ export default {
 export const execute = async ({ answer, answers: { appname } }) => {
     const { createReactApp, razzle } = GENERATOR_TYPES;
     const generator = answer ? razzle : createReactApp;
-    // store.changeState({
-    //     generator: generator,
-    // });
 
     await run(`npx ${generator} ${appname}`);
 

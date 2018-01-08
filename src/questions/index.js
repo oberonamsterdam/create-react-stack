@@ -38,120 +38,71 @@ const generators = {
     notExpo: [createReactApp, razzle, reactNativeCli],
 };
 
-// requirements are for skipping exec functions of questions.
-// condition should return true if should exist
-// generators are to say which generators are supported by this question.
-// TODO check for generators in src/index.js aswell
-export default {
-    mobile: {
+const questions = {
+    [mobile]: {
         question: mobileQuestion,
         execute: executeMobile,
         type: mobile,
         generators: generators.all,
-        requirements: [
-            {
-                condition: ({ answer }) => !!answer,
-            },
-        ],
     },
-    expo: {
+    [expo]: {
         question: expoQuestion,
         execute: executeExpo,
         type: expo,
         generators: generators.all,
-        requirements: [
-            {
-                condition: ({ answers: { mobile } }) => !!mobile,
-            },
-        ],
     },
-    ssr: {
+    [ssr]: {
         question: ssrQuestion,
         execute: executeSSR,
         type: ssr,
         generators: generators.all,
-        requirements: [
-            {
-                condition: ({ mobile }) => !mobile,
-            },
-        ],
     },
-    flow: {
+    [flow]: {
         question: flowQuestion,
         execute: executeFlow,
         type: flow,
         generators: generators.notExpo,
-        requirements: [
-            {
-                condition: ({ answer }) => !!answer,
-            },
-        ],
     },
-    redux: {
+    [redux]: {
         question: reduxQuestion,
         execute: executeRedux,
         type: redux,
         generators: generators.notExpo,
-        requirements: [],
     },
-    reduxPersist: {
+    [reduxPersist]: {
         question: reduxPersistQuestion,
         execute: executeReduxPersist,
         type: reduxPersist,
         generators: generators.notExpo,
-        requirements: [
-            {
-                condition: ({ answers: { redux } }) => redux,
-            },
-        ],
     },
-    eslint: {
+    [eslint]: {
         question: eslintQuestion,
         execute: executeEslint,
         type: eslint,
         generators: generators.notExpo,
-        requirements: [
-            {
-                condition: ({ answer }) => !!answer,
-            },
-        ],
     },
-    eslintConfig: {
+    [eslintConfig]: {
         question: eslintConfigQuestion,
         execute: executeEslintConfig,
         type: eslintConfig,
         generators: generators.notExpo,
-        requirements: [
-            {
-                condition: ({ answers: { mobile, eslint } }) => !(mobile && !eslint),
-            },
-        ],
+
     },
-    polyfill: {
+    [polyfill]: {
         question: polyfillQuestion,
         execute: executePolyfill,
         type: polyfill,
         generators: generators.notExpo,
-        requirements: [
-            {
-                condition: ({ answer, answers: { mobile } }) => {
-                    return !!answer && mobile !== true;
-                },
-            },
-        ],
     },
-    styledComponents: {
+    [styledComponents]: {
         question: styledComponentsQuestion,
         execute: executeStyledComponents,
         type: styledComponents,
         generators: generators.notExpo,
-        requirements: [
-            {
-                condition: ({ answer }) => !!answer,
-            },
-        ],
     },
 };
+
+export default questions;
 
 export const postInstall = {
     eslint: eslintPostInstall,

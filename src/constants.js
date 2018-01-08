@@ -5,9 +5,10 @@ export const GENERATOR_TYPES = {
     expo: 'create-react-native-app',
 };
 export const QUESTION_TYPES = {
+    appname: 'appname',
     mobile: 'mobile',
     expo: 'expo',
-    ssr: 'ssr',
+    ssr: 'reduxSsr',
     redux: 'redux',
     flow: 'flow',
     reduxPersist: 'reduxPersist',

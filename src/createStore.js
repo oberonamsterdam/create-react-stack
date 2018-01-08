@@ -1,7 +1,8 @@
+import { GENERATOR_TYPES } from './constants';
 import createStore from './store';
 
 const defaultState = {
-    generator: '',
+    generator: GENERATOR_TYPES.createReactApp,
     ejected: false,
     error: '',
     answers: [],
