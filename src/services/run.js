@@ -15,10 +15,10 @@ export default (command, options = {}) => {
             shell: true,
             ...options
         });
-
+        
         child.on('close', (code) => {
             if (code !== 0) {
-                reject(new Error(`Process ${cmd} exited with code ${code}`));
+                reject(new Error(`Process ${command} exited with code ${code}`));
             } else {
                 resolve();
             }

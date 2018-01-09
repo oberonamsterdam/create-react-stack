@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 import chalk from 'chalk';
 
+// todo use jari's new logger
+
 export default (message, type = 'log', ...misc) => {
     if (type === 'debug' && !process.env.DEBUG) {
         return;

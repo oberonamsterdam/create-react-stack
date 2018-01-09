@@ -14,7 +14,7 @@ import run from './services/run';
 
 const get = promisify(cmd.get, {
     thisArg: cmd,
-    multiArgs: true,
+    multiArgs: true
 });
 
 (async () => {
@@ -53,7 +53,7 @@ const get = promisify(cmd.get, {
 Remember, you can run CRS as follows: {dim create-react-stack my-awesome-app}
 Please specify a name now:`,
                 name: 'appname',
-                default: 'my-awesome-app',
+                default: 'my-awesome-app'
             },
             ...questionsArray
         ];
@@ -83,7 +83,7 @@ Please specify a name now:`,
         console.log();
 
         await run(`${useYarn ? 'yarn add' : 'npm install'} ${packages.join(' ')}`, {
-            cwd: path.join(process.cwd(), answers.appname),
+            cwd: path.join(process.cwd(), answers.appname)
         });
     }
     if (devPackages.length) {
@@ -95,7 +95,7 @@ Please specify a name now:`,
         console.log();
 
         await run(`${useYarn ? 'yarn add' : 'npm install'} ${devPackages.join(' ')} --${useYarn ? 'dev' : 'save-dev'}`, {
-            cwd: path.join(process.cwd(), answers.appname),
+            cwd: path.join(process.cwd(), answers.appname)
         });
     }
 

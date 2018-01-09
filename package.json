@@ -4,8 +4,9 @@
     "description": "",
     "main": "src/index.js",
     "scripts": {
-        "start": "backpack",
-        "build": "backpack build && ./prepend-shebang.sh",
+        "start": "BACKPACK_ENTRY=index backpack",
+        "snapshots": "BACKPACK_ENTRY=createSnapshots backpack",
+        "build": "BACKPACK_ENTRY=index backpack build && ./prepend-shebang.sh",
         "test": "echo \"Error: no test specified\" && exit 1",
         "prepublish": "npm run build"
     },
@@ -27,7 +28,11 @@
     "devDependencies": {
         "babel-eslint": "^7.2.3",
         "eslint": "^4.6.1",
-        "eslint-config-oberon": "^1.1.2"
+        "eslint-config-oberon": "^1.1.2",
+        "create-razzle-app": "^0.8.7",
+        "create-react-app": "^1.4.3",
+        "react-native-cli": "^2.0.1",
+        "create-react-native-app": "^1.0.0"
     },
     "repository": {
         "url": "http://github.com/oberonamsterdam/create-react-stack"
