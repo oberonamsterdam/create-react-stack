@@ -1,6 +1,4 @@
-import { GENERATOR_TYPES } from '../constants';
-import { store } from '../createStore';
-import run from '../services/run';
+import { QUESTION_TYPES } from '../constants';
 
 export default {
     type: 'confirm',
@@ -8,10 +6,26 @@ export default {
     message: 'Are you building a mobile project? (https://facebook.github.io/react-native/)',
 };
 
-export const execute = async ({ answers: { appname } }) => {
-    const currentGenerator = store.getState().generator;
+export const execReactNative = async (answers) => {
 
-    if (currentGenerator === GENERATOR_TYPES.reactNativeCli) {
-        await run(`npx react-native-cli init ${appname}`);
-    }
 };
+export const execRazzle = async (answers) => {
+
+};
+export const execCreateReactApp = async (answers) => {
+
+};
+
+export const execute = {
+    [QUESTION_TYPES.mobile]: execReactNative,
+    [QUESTION_TYPES.razzle]: execRazzle,
+    [QUESTION_TYPES.createReactApp]: execCreateReactApp,
+};
+
+// export const execute = async ({ answers: { appname } }) => {
+//     const currentGenerator = store.getState().generator;
+//
+//     if (currentGenerator === GENERATOR_TYPES.reactNative) {
+//         await run(`npx create-react-native-app ${appname}`);
+//     }
+// };

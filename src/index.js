@@ -156,12 +156,34 @@ Please specify a name now:`,
     // run exec of questions
     for (const answerKey of Object.keys(answers)) {
         const answer = answers[answerKey];
-        if (typeof answer === 'boolean' && answerKey !== QUESTION_TYPES.appname) {
-            if (answer === true) {
-                await questions[answerKey].execute({ answer: answer, answers, packages, devPackages });
+        if (answerKey !== QUESTION_TYPES.appname) {
+            const exec = questions[answerKey].execute;
+            const params = { answer: answer, answers, packages, devPackages };
+            const currentGenerator = store.getState().generator;
+            const execKeyed = Object.keys(exec);
+
+            if ((typeof answerKey === 'boolean' && answerKey === false) || !answerKey) {
+                continue;
+            } else if (typeof exec === 'function') {
+                await exec(params);
+                continue;
             }
-        } else if (answerKey !== QUESTION_TYPES.appname) {
-            await questions[answerKey].execute({ answer: answer, answers, packages, devPackages });
+
+            for (const key of execKeyed) {
+                const func = exec[key];
+                if (currentGenerator === key) {
+                    await func(params);
+                    continue;
+                }
+
+                const index = execKeyed.findIndex((r) => r === key);
+                // this means we're at the last item & the current gen is not the current key, which means we couldn't determine which function to run.
+                if (index === (execKeyed.length - 1)) {
+                    if (process.env.DEBUG === 1) {
+                        log(`Couldn't determine what function to run! Answer: \n${JSON.stringify(answer)}`, 'debug');
+                    }
+                }
+            }
         }
     }
 
