@@ -1,3 +1,7 @@
+import promisify from 'es6-promisify';
+import fs from 'fs';
+import cmd from 'node-cmd';
+
 export const GENERATOR_TYPES = {
     createReactApp: 'create-react-app',
     razzle: 'create-razzle-app',
@@ -15,4 +19,16 @@ export const QUESTION_TYPES = {
     eslintConfig: 'eslintConfig',
     polyfill: 'polyfill',
     styledComponents: 'styledComponents',
+};
+
+export const PROMISIFIED_METHODS = {
+    writeFile: promisify(fs.writeFile),
+    get: promisify(cmd.get, {
+        thisArg: cmd,
+        multiArgs: true,
+    }),
+    rm: promisify(fs.unlink),
+    mv: promisify(fs.rename, { multiArgs: true }),
+    mkdir: promisify(fs.mkdir, { multiArgs: true }),
+    copy: promisify(fs.copyFile, { multiArgs: true }),
 };

@@ -1,9 +1,13 @@
+import BaseQuestion from './BaseQuestion';
+
 export default {
     type: 'confirm',
     name: 'styledComponents',
     message: 'Use styled-components? (http://styled-components.com)',
 };
 
-export const execute = async ({ answer, packages }) => {
-    packages.push('styled-components');
-};
+export class StyledComponentsExecute extends BaseQuestion {
+    default = async () => {
+        this.packages.push('styled-components');
+    };
+}

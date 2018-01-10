@@ -1,11 +1,8 @@
-import fs from 'fs-extra';
-import globby from 'globby';
 import path from 'path';
 import replace from 'replace-in-file';
-import { GENERATOR_TYPES } from '../constants';
-import { store } from '../createStore';
-import log from '../services/log';
+import { PROMISIFIED_METHODS, QUESTION_TYPES } from '../constants';
 import { reduxNoSsr, reduxSsr } from '../snippets';
+import BaseQuestion from './BaseQuestion';
 
 export default {
     type: 'confirm',
@@ -13,56 +10,55 @@ export default {
     message: 'Use redux? (http://redux.js.org/)',
 };
 
-export const execute = async ({ answer, answers: { appname, ssr, flow, mobile }, packages }) => {
-    const { generator } = store.getState();
-    const { reactNativeCli, razzle, createReactApp } = GENERATOR_TYPES;
-    if (answer) {
-        packages.push('redux', 'react-redux');
+export class ReduxExecute extends BaseQuestion {
+    constructor (data) {
+        super(data);
+        // bind stuff to this
+
+        this.appname = this.answers.appname;
+        this.packages.push('redux', 'react-redux');
+        this.template = path.resolve(path.join(__dirname, '..', 'templates', 'web-with-redux', 'src'));
+        this.src = path.join(process.cwd(), this.appname, 'src');
     }
 
-    if (answer && generator !== reactNativeCli) {
-        const template = path.resolve(path.join(__dirname, '..', 'templates', 'web-with-redux', 'src'));
-        const src = path.join(process.cwd(), appname, 'src');
+    [QUESTION_TYPES.razzle] = async () => {
+        this.packages.push('serialize-javascript');
 
-        if (generator === razzle) {
-            packages.push('serialize-javascript');
+        await this.replaceRazzleSnippets();
 
-            await replace({
-                from: [reduxSsr.server.from], // *confused monkey sounds*, this needs to be wrapped in an Array, even though the reference IS an array
-                to: [reduxSsr.server.to],
-                files: path.join(process.cwd(), appname, 'src', 'server.js'),
-            });
+        await PROMISIFIED_METHODS.copy(path.join(this.template, 'components', `App${this.answers.flow ? '-with-flow' : ''}.js`), path.join(this.src, 'components', 'App.js'));
 
-            await replace({
-                from: [reduxSsr.client.from],
-                to: [reduxSsr.client.to],
-                files: path.join(process.cwd(), appname, 'src', 'client.js'),
-            });
+        await this.copyCreateStoreTemplateFilesToSrc();
+    };
 
-            await fs.copy(path.join(template, 'components', `App${flow ? '-with-flow' : ''}.js`), path.join(src, 'components', 'App.js'));
-        } else if (generator === createReactApp) {
-            await replace({
-                from: [reduxNoSsr.index.from],
-                to: [reduxNoSsr.index.from],
-                files: path.join(process.cwd(), appname, 'src', 'index.js'),
-            });
-        }
-        await fs.copy(path.join(template, 'createStore.js'), path.join(src, 'createStore.js'));
-    } else if (generator === reactNativeCli) {
-        const template = path.join(__dirname, '..', 'templates', 'react-native', answer ? 'with-redux' : 'without-redux');
-        const appDir = path.join(process.cwd(), appname);
-        const files = await globby(path.join(template, '**/*.js'));
-        const promises = [];
-        for (const from of files) {
-            const to = path.join(appDir, path.relative(template, from));
-            log('Copying', 'debug', from, 'to', to);
-            promises.push(fs.copy(from, to));
-        }
-        await Promise.all(promises);
+    [QUESTION_TYPES.createReactApp] = async () => {
+        await this.replaceCRASnippets();
+
+        await this.copyCreateStoreTemplateFilesToSrc();
+    };
+
+    replaceRazzleSnippets = async () => {
         await replace({
-            from: /%appname%/g,
-            to: appname,
-            files: path.join(process.cwd(), appname, 'index.js'),
+            from: [reduxSsr.server.from],
+            to: [reduxSsr.server.to],
+            files: path.join(process.cwd(), this.appname, 'src', 'server.js'),
         });
-    }
-};
+        await replace({
+            from: [reduxSsr.client.from],
+            to: [reduxSsr.client.to],
+            files: path.join(process.cwd(), this.appname, 'src', 'client.js'),
+        });
+    };
+
+    replaceCRASnippets = async () => {
+        await replace({
+            from: [reduxNoSsr.index.from],
+            to: [reduxNoSsr.index.from],
+            files: path.join(process.cwd(), this.appname, 'src', 'index.js'),
+        });
+    };
+
+    copyCreateStoreTemplateFilesToSrc = async () => {
+        await PROMISIFIED_METHODS.copy(path.join(this.template, 'createStore.js'), path.join(this.src, 'createStore.js'));
+    };
+}

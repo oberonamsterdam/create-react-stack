@@ -1,16 +1,17 @@
 import { GENERATOR_TYPES, QUESTION_TYPES } from '../constants';
-import eslintQuestion, { execute as executeEslint } from './eslint';
+import eslintQuestion, { EslintExecute } from './eslint';
 import eslintConfigQuestion, {
-    execute as executeEslintConfig,
+    EslintConfigExecute,
+    ExecuteEslintConfig,
     postInstall as eslintPostInstall,
 } from './eslint-config';
-import flowQuestion, { execute as executeFlow, postInstall as flowPostInstall } from './flow';
-import mobileQuestion, { execute as executeMobile } from './mobile';
-import polyfillQuestion, { execute as executePolyfill } from './polyfill';
-import reduxQuestion, { execute as executeRedux } from './redux';
-import reduxPersistQuestion, { execute as executeReduxPersist } from './redux-persist';
-import ssrQuestion, { execute as executeSSR } from './ssr';
-import styledComponentsQuestion, { execute as executeStyledComponents } from './styled-components';
+import flowQuestion, { FlowExecute, postInstall as flowPostInstall } from './flow';
+import mobileQuestion, { MobileExec } from './mobile';
+import polyfillQuestion, { PolyFillExecute } from './polyfill';
+import reduxQuestion, { ReduxExecute } from './redux';
+import reduxPersistQuestion, { ReduxPersistExecute } from './redux-persist';
+import ssrQuestion, { SsrExecute } from './ssr';
+import styledComponentsQuestion, { StyledComponentsExecute, } from './styled-components';
 
 const {
     mobile,
@@ -27,68 +28,70 @@ const {
 const {
     createReactApp,
     razzle,
-    reactNative
+    reactNative,
 } = GENERATOR_TYPES;
 
 const generators = {
-    all: [createReactApp, razzle, reactNative ],
+    all: [createReactApp, razzle, reactNative],
+    web: [createReactApp, razzle],
+    native: [reactNative],
 };
 
 const questions = {
     [mobile]: {
         question: mobileQuestion,
-        execute: executeMobile,
+        execute: MobileExec,
         type: mobile,
         generators: generators.all,
     },
     [ssr]: {
         question: ssrQuestion,
-        execute: executeSSR,
+        execute: SsrExecute,
         type: ssr,
         generators: generators.all,
     },
     [flow]: {
         question: flowQuestion,
-        execute: executeFlow,
+        execute: FlowExecute,
         type: flow,
-        generators: generators.all,
+        generators: generators.web,
     },
     [redux]: {
         question: reduxQuestion,
-        execute: executeRedux,
+        execute: ReduxExecute,
         type: redux,
-        generators: generators.all,
+        generators: generators.web,
     },
     [reduxPersist]: {
         question: reduxPersistQuestion,
-        execute: executeReduxPersist,
+        execute: ReduxPersistExecute,
         type: reduxPersist,
-        generators: generators.all,
+        generators: generators.web,
     },
     [eslint]: {
         question: eslintQuestion,
-        execute: executeEslint,
+        execute: EslintExecute,
         type: eslint,
-        generators: generators.all,
+        generators: generators.web,
     },
     [eslintConfig]: {
         question: eslintConfigQuestion,
-        execute: executeEslintConfig,
+        execute: EslintConfigExecute,
         type: eslintConfig,
-        generators: generators.all,
+        generators: generators.web,
 
     },
     [polyfill]: {
         question: polyfillQuestion,
-        execute: executePolyfill,
+        execute: PolyFillExecute,
         type: polyfill,
-        generators: generators.all,
+        generators: generators.web,
     },
     [styledComponents]: {
         question: styledComponentsQuestion,
-        execute: executeStyledComponents,
+        execute: StyledComponentsExecute,
         type: styledComponents,
-        generators: generators.all,
+        generators: generators.web,
     },
 };
 

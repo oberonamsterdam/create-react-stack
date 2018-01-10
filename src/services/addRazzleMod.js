@@ -1,12 +1,9 @@
-import fs from 'fs';
-import promisify from 'es6-promisify';
 import path from 'path';
-
-const writeFile = promisify(fs.writeFile);
+import { PROMISIFIED_METHODS } from '../constants';
 
 export default async appname => {
-    // language=JavaScript
-    await writeFile(path.join(process.cwd(), appname, 'razzle.config.js'), `
+
+    await PROMISIFIED_METHODS.writeFile(path.join(process.cwd(), appname, 'razzle.config.js'), `
 const usePolyfill = false;
 
 module.exports = {

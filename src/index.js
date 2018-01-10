@@ -3,24 +3,24 @@
 import chalk from 'chalk';
 import check from 'check-types';
 import program from 'commander';
-import promisify from 'es6-promisify';
 import inquirer from 'inquirer';
-import cmd from 'node-cmd';
 import path from 'path';
 import Rx from 'rx';
 import _package from '../package.json';
-import { QUESTION_TYPES } from './constants';
+import { PROMISIFIED_METHODS, QUESTION_TYPES } from './constants';
 import { store } from './createStore';
 import questions from './questions';
-import { postInstall } from './questions/index';
-import { checkForValidAppname, getQuestion, updateGenerator } from './services/Helpers';
+import { checkForValidAppname, updateGenerator } from './services/Helpers';
 import log from './services/log';
 import run from './services/run';
 
-const get = promisify(cmd.get, {
-    thisArg: cmd,
-    multiArgs: true,
-});
+/*
+* Some todos
+* */
+// TODO implement postInstall as a method on question classes. do this by adding all postInstall methods to an array and calling them afterwards.
+// TODO breaks atm. command not found: flow @ flow.js
+// TODO expo implementation / check on all questions.
+// TODO fix imports at questions/index.js
 
 export let questionsArray = Object.keys(questions).map((key) => questions[key]);
 let questionIndex = 0;
@@ -35,7 +35,7 @@ let questionIndex = 0;
 
     let useYarn = false;
     try {
-        await get('which yarn');
+        await PROMISIFIED_METHODS.get('which yarn');
         useYarn = true;
         log(chalk`{bold Using yarn!} If you wish to use npm instead, you will have to remove yarn: {dim npm remove yarn -g} (if you installed it with npm)`, 'warn');
         log(chalk`CRA issue: {underline https://github.com/facebookincubator/create-react-app/issues/2809}`, 'warn');
@@ -45,7 +45,7 @@ let questionIndex = 0;
     }
 
     try {
-        await get('which npx');
+        await PROMISIFIED_METHODS.get('which npx');
     } catch (ex) {
         log(chalk`Unable to locate npx, please update npm to 5.3+ by running {dim npm i npm -g}`, 'error');
         process.exit(1);
@@ -152,30 +152,31 @@ Please specify a name now:`,
 
     let packages = [];
     let devPackages = [];
+    const postInstallFuncs = [];
 
     // run exec of questions
     for (const answerKey of Object.keys(answers)) {
         const answer = answers[answerKey];
         if (answerKey !== QUESTION_TYPES.appname) {
-            if ((typeof answerKey === 'boolean' && answerKey === false) || !answerKey) {
-                continue;
-            }
-
             const Exec = questions[answerKey].execute;
             const state = store.getState();
             const params = { answer: answer, answers, packages, devPackages, state };
             const currentGenerator = store.getState().generator;
             const instance = new Exec(params);
 
-            // TODO fix imports at questions/index.js
+            if ((typeof answerKey === 'boolean' && answerKey === false) && !!instance.onNoAnswer) {
+                await instance.onNoAnswer();
+                continue;
+            }
+
             // if using default or something else is wrong
             if (!instance[currentGenerator]) {
                 if (typeof instance.default === 'function') {
-                    instance.default();
+                    await instance.default();
+                    postInstallFuncs.push(instance.onPostInstall);
                     const { packages: packagesNew, devPackages: devPackagesNew } = instance.retrievePackages();
                     packages = packagesNew;
                     devPackages = devPackagesNew;
-
                     continue;
                 } else {
                     if (process.env.DEBUG === 1) {
@@ -187,7 +188,8 @@ Please specify a name now:`,
 
             // if everything is mucho bueno
             if (instance[currentGenerator]) {
-                instance[currentGenerator]();
+                await instance[currentGenerator]();
+                postInstallFuncs.push(instance.onPostInstall);
             }
         }
     }
@@ -222,10 +224,9 @@ Please specify a name now:`,
 
     log('🚚  All packages installed.');
 
-    for (const key of Object.keys(questions)) {
-        if (key in postInstall) {
-            await postInstall[key]({ answer: answers[key], answers });
-        }
+    // run post install
+    for (const postInstallFunc of postInstallFuncs) {
+        await postInstallFunc();
     }
 
     log('🔥  All done! Your app is ready to use.');

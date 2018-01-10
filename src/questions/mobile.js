@@ -10,7 +10,7 @@ export default {
 export class MobileExec extends BaseQuestion {
     constructor (data) {
         super(data);
-        this.appname = this.obj.answers.appname;
+        this.appname = this.answers.appname;
     }
 
     default = async () => {

@@ -1,5 +1,6 @@
 import path from 'path';
 import replace from 'replace-in-file';
+import BaseQuestion from './BaseQuestion';
 
 export default {
     type: 'confirm',
@@ -8,19 +9,23 @@ export default {
     when: ({ redux }) => redux,
 };
 
-export const execute = async ({ answer, answers: { appname, redux }, packages }) => {
+export class ReduxPersistExecute extends BaseQuestion {
+    default = async () => {
+        this.packages.push('redux-persist');
+        this.stripSection = /\s\/\/ @crs-without-persist-start([\s\S]*?)\/\/ @crs-without-persist-end/gm;
+        await this.replaceTemplate();
+    };
 
-    let stripSection;
-    if (!answer) {
-        stripSection = /\s\/\/ @crs-with-persist-start([\s\S]*?)\/\/ @crs-with-persist-end/gm;
-    } else {
-        packages.push('redux-persist');
-        stripSection = /\s\/\/ @crs-without-persist-start([\s\S]*?)\/\/ @crs-without-persist-end/gm;
-    }
+    onNoAnswer = async () => {
+        this.stripSection = /\s\/\/ @crs-with-persist-start([\s\S]*?)\/\/ @crs-with-persist-end/gm;
+        await this.replaceTemplate();
+    };
 
-    await replace({
-        from: [stripSection, /\s*\/\/ @crs-(with|without)-persist-(start|end)/gm],
-        to: ['', ''],
-        files: path.join(process.cwd(), appname, 'src', 'createStore.js'),
-    });
-};
+    replaceTemplate = async () => {
+        await replace({
+            from: [this.stripSection, /\s*\/\/ @crs-(with|without)-persist-(start|end)/gm],
+            to: ['', ''],
+            files: path.join(process.cwd(), this.answers.appname, 'src', 'createStore.js'),
+        });
+    };
+}

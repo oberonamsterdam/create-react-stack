@@ -1,5 +1,3 @@
-import promisify from 'es6-promisify';
-import fs from 'fs';
 import path from 'path';
 import replace from 'replace-in-file';
 import { GENERATOR_TYPES, QUESTION_TYPES } from '../constants';
@@ -14,8 +12,12 @@ export default {
 };
 
 export class SsrExecute extends BaseQuestion {
-    mv = promisify(fs.rename, { multiArgs: true });
-    mkdir = promisify(fs.mkdir, { multiArgs: true });
+    constructor (data) {
+        super(data);
+        this.src = path.join(process.cwd(), this.answers.appname, 'src');
+        this.files = ['App.js', 'App.test.js', 'App.css'];
+        this.components = path.join(this.src, 'components');
+    }
 
     [QUESTION_TYPES.razzle] = async () => {
         await this.initSsrSetup();
@@ -25,7 +27,7 @@ export class SsrExecute extends BaseQuestion {
 
     [QUESTION_TYPES.createReactApp] = async () => {
         await this.initSsrSetup();
-        const files = [path.join(this.src, 'index.js');
+        const files = [path.join(this.src, 'index.js')];
         await this.replaceFiles(files);
     };
 
@@ -37,13 +39,16 @@ export class SsrExecute extends BaseQuestion {
         });
     };
 
+    moveFiles = async () => {
+        const promises = [];
+        for (const file of this.files) {
+            promises.push(this.mv(path.join(this.src, file), path.join(this.components, file)));
+        }
+        await Promise.all(promises);
+    };
+
     initSsrSetup = async () => {
         await run(`npx ${this.generator} ${this.appname}`);
-
-        // move components to seperate components folder
-        this.src = path.join(process.cwd(), this.answers.appname, 'src');
-        const components = path.join(src, 'components');
-        this.files = ['App.js', 'App.test.js', 'App.css'];
 
         if (this.generator === GENERATOR_TYPES.razzle) {
             this.files = [...this.files, 'Home.js', 'Home.css', 'react.svg'];
@@ -52,13 +57,10 @@ export class SsrExecute extends BaseQuestion {
             this.files = [...this.files, 'logo.svg'];
         }
 
-        await this.mkdir(components);
+        // make components dir
+        await this.mkdir(this.components);
 
-        // rename stuff
-        const promises = [];
-        for (const file of this.files) {
-            promises.push(this.mv(path.join(this.src, file), path.join(components, file)));
-        }
-        await Promise.all(promises);
+        // move files into dir
+        await this.moveFiles();
     };
-};
+}
