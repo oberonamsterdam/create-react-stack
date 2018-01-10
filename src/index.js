@@ -150,39 +150,44 @@ Please specify a name now:`,
 
     log(chalk`🍳  Cooking up a fresh new app...`);
 
-    const packages = [];
-    const devPackages = [];
+    let packages = [];
+    let devPackages = [];
 
     // run exec of questions
     for (const answerKey of Object.keys(answers)) {
         const answer = answers[answerKey];
         if (answerKey !== QUESTION_TYPES.appname) {
-            const exec = questions[answerKey].execute;
-            const params = { answer: answer, answers, packages, devPackages };
-            const currentGenerator = store.getState().generator;
-            const execKeyed = Object.keys(exec);
-
             if ((typeof answerKey === 'boolean' && answerKey === false) || !answerKey) {
-                continue;
-            } else if (typeof exec === 'function') {
-                await exec(params);
                 continue;
             }
 
-            for (const key of execKeyed) {
-                const func = exec[key];
-                if (currentGenerator === key) {
-                    await func(params);
+            const Exec = questions[answerKey].execute;
+            const state = store.getState();
+            const params = { answer: answer, answers, packages, devPackages, state };
+            const currentGenerator = store.getState().generator;
+            const instance = new Exec(params);
+
+            // TODO fix imports at questions/index.js
+            // if using default or something else is wrong
+            if (!instance[currentGenerator]) {
+                if (typeof instance.default === 'function') {
+                    instance.default();
+                    const { packages: packagesNew, devPackages: devPackagesNew } = instance.retrievePackages();
+                    packages = packagesNew;
+                    devPackages = devPackagesNew;
+
+                    continue;
+                } else {
+                    if (process.env.DEBUG === 1) {
+                        log(`No runnable function found at question: ${questions[answerKey]}. This should be a function.`, 'debug');
+                    }
                     continue;
                 }
+            }
 
-                const index = execKeyed.findIndex((r) => r === key);
-                // this means we're at the last item & the current gen is not the current key, which means we couldn't determine which function to run.
-                if (index === (execKeyed.length - 1)) {
-                    if (process.env.DEBUG === 1) {
-                        log(`Couldn't determine what function to run! Answer: \n${JSON.stringify(answer)}`, 'debug');
-                    }
-                }
+            // if everything is mucho bueno
+            if (instance[currentGenerator]) {
+                instance[currentGenerator]();
             }
         }
     }

@@ -1,4 +1,5 @@
-import { QUESTION_TYPES } from '../constants';
+import run from '../services/run';
+import BaseQuestion from './BaseQuestion';
 
 export default {
     type: 'confirm',
@@ -6,26 +7,13 @@ export default {
     message: 'Are you building a mobile project? (https://facebook.github.io/react-native/)',
 };
 
-export const execReactNative = async (answers) => {
+export class MobileExec extends BaseQuestion {
+    constructor (data) {
+        super(data);
+        this.appname = this.obj.answers.appname;
+    }
 
-};
-export const execRazzle = async (answers) => {
-
-};
-export const execCreateReactApp = async (answers) => {
-
-};
-
-export const execute = {
-    [QUESTION_TYPES.mobile]: execReactNative,
-    [QUESTION_TYPES.razzle]: execRazzle,
-    [QUESTION_TYPES.createReactApp]: execCreateReactApp,
-};
-
-// export const execute = async ({ answers: { appname } }) => {
-//     const currentGenerator = store.getState().generator;
-//
-//     if (currentGenerator === GENERATOR_TYPES.reactNative) {
-//         await run(`npx create-react-native-app ${appname}`);
-//     }
-// };
+    default = async () => {
+        await run(`npx create-react-native-app ${this.appname}`);
+    };
+}

@@ -2,12 +2,9 @@ import promisify from 'es6-promisify';
 import fs from 'fs';
 import path from 'path';
 import replace from 'replace-in-file';
-import { GENERATOR_TYPES } from '../constants';
-import { store } from '../createStore';
+import { GENERATOR_TYPES, QUESTION_TYPES } from '../constants';
 import run from '../services/run';
-
-const mv = promisify(fs.rename, { multiArgs: true });
-const mkdir = promisify(fs.mkdir, { multiArgs: true });
+import BaseQuestion from './BaseQuestion';
 
 export default {
     type: 'confirm',
@@ -16,46 +13,52 @@ export default {
     when: ({ mobile }) => !mobile,
 };
 
-export const execute = async ({ answer, answers: { appname } }) => {
-    const currentGenerator = store.getState().generator;
-    const { createReactApp, razzle } = GENERATOR_TYPES;
-    if (currentGenerator !== createReactApp && currentGenerator !== razzle) {
-        throw new Error('Invalid generator in state for question SSR.');
-    }
+export class SsrExecute extends BaseQuestion {
+    mv = promisify(fs.rename, { multiArgs: true });
+    mkdir = promisify(fs.mkdir, { multiArgs: true });
 
-    await run(`npx ${currentGenerator} ${appname}`);
+    [QUESTION_TYPES.razzle] = async () => {
+        await this.initSsrSetup();
+        const files = [path.join(this.src, 'client.js'), path.join(this.src, 'server.js')];
+        await this.replaceFiles(files);
+    };
 
-    // move components into separate components dir.
-    const src = path.join(process.cwd(), appname, 'src');
-    const components = path.join(src, 'components');
-    let files = ['App.js', 'App.test.js', 'App.css'];
+    [QUESTION_TYPES.createReactApp] = async () => {
+        await this.initSsrSetup();
+        const files = [path.join(this.src, 'index.js');
+        await this.replaceFiles(files);
+    };
 
-    if (currentGenerator === razzle) {
-        files = [...files, 'Home.js', 'Home.css', 'react.svg'];
-    }
-    if (currentGenerator === createReactApp) {
-        files = [...files, 'logo.svg'];
-    }
+    replaceFiles = async (files) => {
+        await replace({
+            files: [files],
+            from: /import App from '\.\/App';/g,
+            to: 'import App from \'./components/App\'',
+        });
+    };
 
-    await mkdir(components);
+    initSsrSetup = async () => {
+        await run(`npx ${this.generator} ${this.appname}`);
 
-    const promises = [];
-    for (const file of files) {
-        promises.push(mv(path.join(src, file), path.join(components, file)));
-    }
-    await Promise.all(promises);
+        // move components to seperate components folder
+        this.src = path.join(process.cwd(), this.answers.appname, 'src');
+        const components = path.join(src, 'components');
+        this.files = ['App.js', 'App.test.js', 'App.css'];
 
-    let replaceFiles = [];
-    if (currentGenerator === razzle) {
-        replaceFiles = [path.join(src, 'client.js'), path.join(src, 'server.js')];
-    }
-    if (currentGenerator === createReactApp) {
-        replaceFiles = path.join(src, 'index.js');
-    }
+        if (this.generator === GENERATOR_TYPES.razzle) {
+            this.files = [...this.files, 'Home.js', 'Home.css', 'react.svg'];
+        }
+        if (this.generator === GENERATOR_TYPES.createReactApp) {
+            this.files = [...this.files, 'logo.svg'];
+        }
 
-    await replace({
-        files: replaceFiles,
-        from: /import App from '\.\/App';/g,
-        to: 'import App from \'./components/App\'',
-    });
+        await this.mkdir(components);
+
+        // rename stuff
+        const promises = [];
+        for (const file of this.files) {
+            promises.push(this.mv(path.join(this.src, file), path.join(components, file)));
+        }
+        await Promise.all(promises);
+    };
 };

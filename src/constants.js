@@ -3,6 +3,7 @@ export const GENERATOR_TYPES = {
     razzle: 'create-razzle-app',
     reactNative: 'create-react-native-app',
 };
+
 export const QUESTION_TYPES = {
     appname: 'appname',
     mobile: 'mobile',
