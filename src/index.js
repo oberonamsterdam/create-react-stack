@@ -18,9 +18,12 @@ import { store } from './store/createStore';
 * Some todos
 * */
 // TODO implement postInstall as a method on question classes. do this by adding all postInstall methods to an array and calling them afterwards. DONE
-// TODO breaks atm. command not found: flow @ flow.js DONE (needs testing)
-// TODO expo implementation / check on all questions.
 // TODO fix imports at questions/index.js DONE
+// TODO breaks atm. command not found: flow @ flow.js DONE (needs testing)
+
+// TODO write tests for flow.js/expo exec
+
+// TODO expo implementation / check on all questions.
 // TODO Make src/index.js class
 
 export let questionsArray = Object.keys(questions).map((key) => questions[key]);
@@ -93,12 +96,11 @@ Please specify a name now:`,
     chooseStack = async () => {
         log('📋  Please choose your stack:');
 
-        const prompts = new Rx.Subject();
+        this.prompts = new Rx.Subject();
 
         this.answers = await new Promise((resolve, reject) => {
-            let answers = store.getState().answers;
             const onNext = async ({ name, answer }) => {
-                answers = store.getState().answers;
+                let answers = store.getState().answers;
                 // TODO clean this up, this is for mobile to check if the appname is valid
                 // TODO because of react-native-cli's policy on alphanumeric only appnames.
                 if (name === QUESTION_TYPES.mobile && answer === true) {
@@ -108,7 +110,7 @@ Please specify a name now:`,
                 const state = store.getState();
                 // means we have an error and should quit process
                 if (state.error.length > 0) {
-                    prompts.onError(state.error);
+                    this.prompts.onError(state.error);
                 }
                 store.changeState({
                     answers: {
@@ -116,25 +118,27 @@ Please specify a name now:`,
                         [name]: answer,
                     },
                 });
-                questionIndex++;
+                answers = store.getState().answers;
 
+                this.questionIndex++;
                 updateGenerator(answers);
 
                 const traverseQuestions = () => {
-                    const question = questionsArray[questionIndex];
+                    const question = this.questionsArray[this.questionIndex];
                     const currentGenerator = store.getState().generator;
                     if (!check.assigned(question)) {
                         return;
                     }
+                    console.log(currentGenerator);
                     if (!question.generators.includes(currentGenerator)) {
-                        questionIndex++;
+                        this.questionIndex++;
                         return traverseQuestions();
                     } else if (typeof question.question.when === 'function') {
                         const isValid = question.question.when(answers);
                         if (isValid) {
                             return question;
                         } else if (!isValid) {
-                            questionIndex++;
+                            this.questionIndex++;
                             return traverseQuestions();
                         }
                     }
@@ -143,27 +147,28 @@ Please specify a name now:`,
 
                 const nextQuestion = traverseQuestions();
 
-                if (!check.assigned(nextQuestion) && !check.assigned(questionsArray[questionIndex + 1])) {
-                    return prompts.onCompleted();
+                if (!check.assigned(nextQuestion) && !check.assigned(this.questionsArray[this.questionIndex + 1])) {
+                    return this.prompts.onCompleted();
                 } else if (check.assigned(nextQuestion.question)) {
-                    return prompts.onNext(nextQuestion.question);
+                    return this.prompts.onNext(nextQuestion.question);
                 } else {
-                    return prompts.onError(nextQuestion.question);
+                    return this.prompts.onError(nextQuestion.question);
                 }
             };
             const onError = (err) => {
                 reject(err);
             };
             const onExit = () => {
-                resolve(answers);
+                resolve(store.getState().answers);
             };
 
-            inquirer.prompt(prompts).ui.process.subscribe(
+            inquirer.prompt(this.prompts).ui.process.subscribe(
                 onNext,
                 onError,
                 onExit,
             );
-            prompts.onNext(questionsArray[questionIndex].question);
+            // kick start question inquiring
+            this.prompts.onNext(this.questionsArray[this.questionIndex].question);
         });
 
         // if argument was passed to command, set it as the answers appname
@@ -247,6 +252,9 @@ Please specify a name now:`,
         await this.installPackages(this.packages, 'dependencies');
         // Run npm install -D / yarn add --dev
         await this.installPackages(this.devPackages, 'devDependencies');
+
+        // Run post install funcs & log nice messages
+        await this.postInstall();
     };
 
     installPackages = async (packages, type) => {
@@ -280,7 +288,6 @@ Please specify a name now:`,
                 cwd: path.join(process.cwd(), this.answers.appname),
             });
         }
-        await this.postInstall();
     };
 
     postInstall = async () => {
@@ -293,8 +300,6 @@ Please specify a name now:`,
 
         log('🔥  All done! Your app is ready to use.');
         log(chalk`Feel free to {blue cd ${this.answers.appname}} and {blue npm start}!`);
-
-        process.exit(0);
     };
 }
 
@@ -302,15 +307,15 @@ Please specify a name now:`,
 (async () => {
     const programInstance = new Main();
     await programInstance.init();
+    // Process doesn't exit because it's a child process of backpack (but does exit if directly run)
+    process.exit();
 })().catch(err => {
     log(err, 'error');
     process.exit(1);
 });
 
-// catches unhandled promise rejections. dont remove :).
+// catches unhandled promise rejections. just in case.
 // shouldnt happen but handy when it does.
-process.on('unhandledRejection', (err) => {
-    log(err.message, 'error');
-    log(err.stack, 'error');
-    process.exit(1);
+process.on('unhandledRejection', (reason, p) => {
+    console.log('Unhandled Rejection at:', p, 'reason:', reason);
 });

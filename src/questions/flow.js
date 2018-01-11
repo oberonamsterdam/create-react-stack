@@ -1,7 +1,7 @@
-import chalk from 'chalk';
-import inquirer from 'inquirer';
 import path from 'path';
-import { PROMISIFIED_METHODS } from '../globals/constants';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
+import { flowReactNative } from '../globals/snippets';
+import log from '../services/log';
 import run from '../services/run';
 import BaseQuestion from './BaseQuestion';
 
@@ -16,43 +16,47 @@ export class FlowExecute extends BaseQuestion {
         super(data);
         this.mobile = this.answers.mobile;
         this.appname = this.answers.appname;
+        this.dir = path.join(process.cwd(), this.appname);
     }
 
     default = async () => {
-        this.devPackages.push('flow-bin');
+        this.devPackages.push('flow-bin@0.56.0');
     };
 
     onPostInstall = async () => {
-        // RN includes .flowconfig by default.
-        // TODO expo?
-        if (!this.answer.flow && this.mobile) {
-            await this.removeFlowConfig();
-        }
-        if (!this.mobile) {
-            await run('flow init', {
-                cwd: path.join(process.cwd(), this.appname),
-            });
-        }
-        await this.runFlowTyped();
-    };
+        if (this.state.generator === GENERATOR_TYPES.reactNative) {
+            const { rm, writeFile } = PROMISIFIED_METHODS;
+            // remove .flowconfig added by expo
+            await rm(path.join(this.dir, '.flowconfig'));
 
-    removeFlowConfig = async () => {
-        // react native includes a .flowconfig by default, so we'll delete it.
-        // (kind of makes no sense to do so but hey, consistency.)
-        await PROMISIFIED_METHODS.rm(path.join(process.cwd(), this.appname, '.flowconfig'));
+            // add our custom .flowconfig
+            await writeFile(path.join(this.dir, '.flowconfig'), flowReactNative.flowConfig);
+
+            // run flow-typed by default to avoid flow throwing errors on undeclared modules
+            await this.runFlowTyped();
+
+            // add react-native type declaration (and other type declaration if needed).
+            await writeFile(path.join(this.dir, 'flow-typed', 'npm', 'index.js'), flowReactNative.flowTyped);
+        } else {
+            await this.runFlowTyped();
+        }
+        await this.runFlow();
     };
 
     runFlowTyped = async () => {
-        const { flowTyped } = await inquirer.prompt([{
-            type: 'confirm',
-            name: 'flowTyped',
-            message: chalk`{bold Run {dim flow-typed} now? (will automatically type all your dependencies)}`,
-        }]);
+        // automatically type dependencies to avoid flow throwing errors on startup
+        await run('npx flow-typed install', {
+            cwd: path.join(process.cwd(), this.appname),
+        });
+    };
 
-        if (flowTyped) {
-            await run('npx flow-typed install', {
-                cwd: path.join(process.cwd(), this.appname),
-            });
-        }
+    runFlow = async () => {
+        console.log();
+        log(`👮  Running flow..`);
+        console.log();
+
+        await run(`node ${path.join('.', 'node_modules', '.bin', 'flow')}`, {
+            cwd: this.dir,
+        });
     };
 }

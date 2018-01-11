@@ -1,7 +1,7 @@
 import check from 'check-types';
 import { GENERATOR_TYPES } from '../globals/constants';
-import { store } from '../store/createStore';
 import { errors } from '../globals/snippets';
+import { store } from '../store/createStore';
 
 export const checkForValidAppname = (appname) => {
     const regex = /^\w+$/g;
@@ -13,27 +13,17 @@ export const checkForValidAppname = (appname) => {
 };
 
 export const updateGenerator = (answers) => {
-    const { expo, createReactApp, reactNativeCli, razzle } = GENERATOR_TYPES;
+    const { reactNative, createReactApp, razzle } = GENERATOR_TYPES;
     const mobileAnswer = answers.mobile;
     const webAnswer = answers.reduxSsr;
 
-    // if mobile
-    if (!check.assigned(webAnswer) && mobileAnswer) {
-        const expoAnswer = answers.expo;
-        if (expoAnswer === true) {
-            // if expo
-            store.changeState({
-                generator: expo,
-            });
-        }
-        if (expoAnswer === false) {
-            // if react-native-cli
-            store.changeState({
-                generator: reactNativeCli,
-            });
-        }
+    // if mobileAnswer is true
+    if (mobileAnswer) {
+        store.changeState({
+            generator: reactNative,
+        });
         // if web
-    } else if (check.assigned(webAnswer) && !mobileAnswer) {
+    } else if (check.assigned(webAnswer)) {
         if (webAnswer === true) {
             // if razzle
             store.changeState({

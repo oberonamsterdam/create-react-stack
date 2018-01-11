@@ -48,6 +48,30 @@ export const reduxNoSsr = {
         ],
     },
 };
+export const flowReactNative = {
+    flowConfig: `
+[ignore]
+.*/node_modules/.*
+[include]
+
+[libs]
+flow-typed/npm
+node_modules/react-native/Libraries/react-native/react-native-interface.js
+node_modules/react-native/flow/
+node_modules/expo/flow/
+
+[version]
+^0.56.0
+`,
+    flowTyped: `
+// @flow
+
+declare module 'react-native' {
+    declare module.exports: any
+}
+`,
+};
+
 export const errors = {
     mobileNotAlphanumeric: `Due to how react-native forces alphanumeric appnames, you can't use non-alphanumeric characters in your appname.
 

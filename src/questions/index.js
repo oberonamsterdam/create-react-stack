@@ -87,7 +87,7 @@ const questions = {
         question: styledComponentsQuestion,
         execute: StyledComponentsExecute,
         type: styledComponents,
-        generators: generators.web,
+        generators: generators.all,
     },
 };
 
