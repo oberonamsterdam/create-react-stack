@@ -1,7 +1,7 @@
 import path from 'path';
 import replace from 'replace-in-file';
-import { PROMISIFIED_METHODS, QUESTION_TYPES } from '../constants';
-import { reduxNoSsr, reduxSsr } from '../snippets';
+import { PROMISIFIED_METHODS, QUESTION_TYPES } from '../globals/constants';
+import { reduxNoSsr, reduxSsr } from '../globals/snippets';
 import BaseQuestion from './BaseQuestion';
 
 export default {

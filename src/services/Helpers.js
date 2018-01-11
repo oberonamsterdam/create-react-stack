@@ -1,7 +1,7 @@
 import check from 'check-types';
-import { GENERATOR_TYPES } from '../constants';
-import { store } from '../createStore';
-import { errors } from '../snippets';
+import { GENERATOR_TYPES } from '../globals/constants';
+import { store } from '../store/createStore';
+import { errors } from '../globals/snippets';
 
 export const checkForValidAppname = (appname) => {
     const regex = /^\w+$/g;

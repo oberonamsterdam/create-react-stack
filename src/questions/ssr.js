@@ -1,6 +1,6 @@
 import path from 'path';
 import replace from 'replace-in-file';
-import { GENERATOR_TYPES, QUESTION_TYPES } from '../constants';
+import { GENERATOR_TYPES, QUESTION_TYPES } from '../globals/constants';
 import run from '../services/run';
 import BaseQuestion from './BaseQuestion';
 

@@ -1,5 +1,5 @@
 import path from 'path';
-import { PROMISIFIED_METHODS } from '../constants';
+import { PROMISIFIED_METHODS } from '../globals/constants';
 
 export default async appname => {
 

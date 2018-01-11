@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import path from 'path';
-import { PROMISIFIED_METHODS } from '../constants';
+import { PROMISIFIED_METHODS } from '../globals/constants';
 import run from '../services/run';
 import BaseQuestion from './BaseQuestion';
 

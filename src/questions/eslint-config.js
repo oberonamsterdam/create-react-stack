@@ -1,11 +1,11 @@
 import chalk from 'chalk';
 import path from 'path';
 import replace from 'replace-in-file';
-import { PROMISIFIED_METHODS, QUESTION_TYPES } from '../constants';
-import { store } from '../createStore';
+import { PROMISIFIED_METHODS, QUESTION_TYPES } from '../globals/constants';
+import { store } from '../store/createStore';
 import log from '../services/log';
 import run from '../services/run';
-import { errors } from '../snippets';
+import { errors } from '../globals/snippets';
 import BaseQuestion from './BaseQuestion';
 
 export default {

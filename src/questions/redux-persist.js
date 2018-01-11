@@ -6,10 +6,14 @@ export default {
     type: 'confirm',
     name: 'reduxPersist',
     message: 'Use redux-persist? (https://github.com/rt2zz/redux-persist)',
-    when: ({ redux }) => redux,
+    when: ({ reduxSsr }) => !!reduxSsr,
 };
 
 export class ReduxPersistExecute extends BaseQuestion {
+    constructor (data) {
+        super(data);
+    }
+
     default = async () => {
         this.packages.push('redux-persist');
         this.stripSection = /\s\/\/ @crs-without-persist-start([\s\S]*?)\/\/ @crs-without-persist-end/gm;

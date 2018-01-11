@@ -7,6 +7,10 @@ export default {
 };
 
 export class StyledComponentsExecute extends BaseQuestion {
+    constructor (data) {
+        super(data);
+    }
+
     default = async () => {
         this.packages.push('styled-components');
     };

@@ -12,6 +12,10 @@ export default {
 };
 
 export class EslintExecute extends BaseQuestion {
+    constructor (data) {
+        super(data);
+    }
+
     default = async () => {
         this.devPackages.push('eslint');
     };

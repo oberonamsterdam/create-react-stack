@@ -1,11 +1,7 @@
-import { GENERATOR_TYPES, QUESTION_TYPES } from '../constants';
+import { GENERATOR_TYPES, QUESTION_TYPES } from '../globals/constants';
 import eslintQuestion, { EslintExecute } from './eslint';
-import eslintConfigQuestion, {
-    EslintConfigExecute,
-    ExecuteEslintConfig,
-    postInstall as eslintPostInstall,
-} from './eslint-config';
-import flowQuestion, { FlowExecute, postInstall as flowPostInstall } from './flow';
+import eslintConfigQuestion, { EslintConfigExecute } from './eslint-config';
+import flowQuestion, { FlowExecute } from './flow';
 import mobileQuestion, { MobileExec } from './mobile';
 import polyfillQuestion, { PolyFillExecute } from './polyfill';
 import reduxQuestion, { ReduxExecute } from './redux';
@@ -96,8 +92,3 @@ const questions = {
 };
 
 export default questions;
-
-export const postInstall = {
-    eslint: eslintPostInstall,
-    flow: flowPostInstall,
-};

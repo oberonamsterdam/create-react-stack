@@ -1,4 +1,4 @@
-import { GENERATOR_TYPES } from './constants';
+import { GENERATOR_TYPES } from '../globals/constants';
 import createStore from './store';
 
 const defaultState = {
