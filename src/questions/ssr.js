@@ -1,6 +1,6 @@
 import path from 'path';
 import replace from 'replace-in-file';
-import { GENERATOR_TYPES, QUESTION_TYPES } from '../globals/constants';
+import { GENERATOR_TYPES } from '../globals/constants';
 import run from '../services/run';
 import BaseQuestion from './BaseQuestion';
 
@@ -19,13 +19,13 @@ export class SsrExecute extends BaseQuestion {
         this.components = path.join(this.src, 'components');
     }
 
-    [QUESTION_TYPES.razzle] = async () => {
+    [GENERATOR_TYPES.razzle] = async () => {
         await this.initSsrSetup();
         const files = [path.join(this.src, 'client.js'), path.join(this.src, 'server.js')];
         await this.replaceFiles(files);
     };
 
-    [QUESTION_TYPES.createReactApp] = async () => {
+    [GENERATOR_TYPES.createReactApp] = async () => {
         await this.initSsrSetup();
         const files = [path.join(this.src, 'index.js')];
         await this.replaceFiles(files);

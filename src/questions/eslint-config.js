@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import path from 'path';
 import replace from 'replace-in-file';
-import { PROMISIFIED_METHODS, QUESTION_TYPES } from '../globals/constants';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS, QUESTION_TYPES } from '../globals/constants';
 import { store } from '../store/createStore';
 import log from '../services/log';
 import run from '../services/run';
@@ -26,7 +26,7 @@ export class EslintConfigExecute extends BaseQuestion {
         this.appname = this.answers.appname;
     }
 
-    [QUESTION_TYPES.razzle] = async () => {
+    [GENERATOR_TYPES.razzle] = async () => {
         await this.addEslintConfigToDevDeps();
         await this.writeFile(path.join(process.cwd(), this.appname, '.eslintrc'), `
 {
@@ -35,7 +35,7 @@ export class EslintConfigExecute extends BaseQuestion {
 `);
     };
 
-    [QUESTION_TYPES.createReactApp] = async () => {
+    [GENERATOR_TYPES.createReactApp] = async () => {
         await this.addEslintConfigToDevDeps();
         log(errors.ejectCRA, 'warn');
 

@@ -1,5 +1,6 @@
 import path from 'path';
 import replace from 'replace-in-file';
+import { GENERATOR_TYPES } from '../globals/constants';
 import BaseQuestion from './BaseQuestion';
 
 export default {
@@ -12,12 +13,20 @@ export default {
 export class ReduxPersistExecute extends BaseQuestion {
     constructor (data) {
         super(data);
+        this.packages.push('redux-persist');
     }
 
-    default = async () => {
+    universalFunction = async () => {
         this.packages.push('redux-persist');
         this.stripSection = /\s\/\/ @crs-without-persist-start([\s\S]*?)\/\/ @crs-without-persist-end/gm;
         await this.replaceTemplate();
+    };
+
+    [GENERATOR_TYPES.razzle] = () => this.universalFunction();
+    [GENERATOR_TYPES.createReactApp] = () => this.universalFunction();
+
+    [GENERATOR_TYPES.reactNative] = async () => {
+
     };
 
     onNoAnswer = async () => {

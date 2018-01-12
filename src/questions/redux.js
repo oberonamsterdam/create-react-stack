@@ -1,6 +1,6 @@
 import path from 'path';
 import replace from 'replace-in-file';
-import { PROMISIFIED_METHODS, QUESTION_TYPES } from '../globals/constants';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
 import { reduxNoSsr, reduxSsr } from '../globals/snippets';
 import BaseQuestion from './BaseQuestion';
 
@@ -21,7 +21,7 @@ export class ReduxExecute extends BaseQuestion {
         this.src = path.join(process.cwd(), this.appname, 'src');
     }
 
-    [QUESTION_TYPES.razzle] = async () => {
+    [GENERATOR_TYPES.razzle] = async () => {
         this.packages.push('serialize-javascript');
 
         await this.replaceRazzleSnippets();
@@ -31,10 +31,14 @@ export class ReduxExecute extends BaseQuestion {
         await this.copyCreateStoreTemplateFilesToSrc();
     };
 
-    [QUESTION_TYPES.createReactApp] = async () => {
+    [GENERATOR_TYPES.createReactApp] = async () => {
         await this.replaceCRASnippets();
 
         await this.copyCreateStoreTemplateFilesToSrc();
+    };
+
+    [GENERATOR_TYPES.reactNative] = async () => {
+
     };
 
     replaceRazzleSnippets = async () => {

@@ -23,6 +23,7 @@ export const QUESTION_TYPES = {
 
 export const PROMISIFIED_METHODS = {
     writeFile: promisify(fs.writeFile),
+    readFile: promisify(fs.readFile),
     get: promisify(cmd.get, {
         thisArg: cmd,
         multiArgs: true,

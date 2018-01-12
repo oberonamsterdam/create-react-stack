@@ -3,9 +3,9 @@ The basequestion class adds certain values to `this`. During runtime certain lif
 
 #### Available methods for question classes:
 * `default` -- Called if the current generator isn't implemented
-* `[QUESTION_TYPES.razzle]` -- Called if the current generator is razzle on execute.
-* `[QUESTION_TYPES.createReactApp]` -- Called if the current generator is CRA on execute.
-* `[QUESTION_TYPES.reactNative]` -- Called if the current generator is CRNA on execute.
+* `[GENERATOR_TYPES.razzle]` -- Called if the current generator is razzle on execute.
+* `[GENERATOR_TYPES.createReactApp]` -- Called if the current generator is CRA on execute.
+* `[GENERATOR_TYPES.reactNative]` -- Called if the current generator is CRNA on execute.
 
 #### Lifecycle methods for question classes:
 * `onNoAnswer` -- Called when answer is false or wasn't given.

@@ -21,13 +21,19 @@ import { store } from './store/createStore';
 // TODO fix imports at questions/index.js DONE
 // TODO breaks atm. command not found: flow @ flow.js DONE (needs testing)
 
-// TODO write tests for flow.js/expo exec
+// TODO write tests..
 
 // TODO expo implementation / check on all questions.
 // TODO Make src/index.js class
 
-export let questionsArray = Object.keys(questions).map((key) => questions[key]);
-let questionIndex = 0;
+// TODO Expo implementation of the following questions:
+// TODO flow.js
+// TODO eslint.js
+// TODO eslint-config.js
+// TODO redux.js
+// TODO redux-persist.js
+// TODO ssr.js
+// TODO styled-components.js -- DONE
 
 class Main {
     constructor () {

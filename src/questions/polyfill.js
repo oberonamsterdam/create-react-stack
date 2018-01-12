@@ -1,6 +1,6 @@
 import path from 'path';
 import replace from 'replace-in-file';
-import { PROMISIFIED_METHODS, QUESTION_TYPES } from '../globals/constants';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS, QUESTION_TYPES } from '../globals/constants';
 import addRazzleMod from '../services/addRazzleMod';
 import log from '../services/log';
 import run from '../services/run';
@@ -21,7 +21,7 @@ export class PolyFillExecute extends BaseQuestion {
         this.packages.push('babel-polyfill');
     }
 
-    [QUESTION_TYPES.razzle] = async () => {
+    [GENERATOR_TYPES.razzle] = async () => {
         this.packages.push('oberon-razzle-modifications');
         await addRazzleMod(this.appname);
         await replace({
@@ -31,7 +31,7 @@ export class PolyFillExecute extends BaseQuestion {
         });
     };
 
-    [QUESTION_TYPES.createReactApp] = async () => {
+    [GENERATOR_TYPES.createReactApp] = async () => {
         log(errors.ejectCRA, 'warn');
         await run('npm run eject', {
             cwd: path.join(process.cwd(), this.appname),
