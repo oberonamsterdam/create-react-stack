@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-constructor */
 import chalk from 'chalk';
 import log from '../services/log';
 import BaseQuestion from './BaseQuestion';
@@ -18,6 +19,7 @@ export class EslintExecute extends BaseQuestion {
 
     default = async () => {
         this.devPackages.push('eslint');
+        this.devPackages.push('babel-eslint');
     };
 
     onPostInstall () {

@@ -7,7 +7,7 @@ import polyfillQuestion, { PolyFillExecute } from './polyfill';
 import reduxQuestion, { ReduxExecute } from './redux';
 import reduxPersistQuestion, { ReduxPersistExecute } from './redux-persist';
 import ssrQuestion, { SsrExecute } from './ssr';
-import styledComponentsQuestion, { StyledComponentsExecute, } from './styled-components';
+import styledComponentsQuestion, { StyledComponentsExecute } from './styled-components';
 
 const {
     mobile,

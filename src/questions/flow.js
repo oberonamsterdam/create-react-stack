@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import path from 'path';
 import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
 import { flowReactNative } from '../globals/snippets';

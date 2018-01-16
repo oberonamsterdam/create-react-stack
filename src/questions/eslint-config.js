@@ -1,11 +1,12 @@
+/* eslint-disable no-console */
 import chalk from 'chalk';
 import path from 'path';
 import replace from 'replace-in-file';
-import { GENERATOR_TYPES, PROMISIFIED_METHODS, QUESTION_TYPES } from '../globals/constants';
-import { store } from '../store/createStore';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
+import { errors } from '../globals/snippets';
 import log from '../services/log';
 import run from '../services/run';
-import { errors } from '../globals/snippets';
+import { store } from '../store/createStore';
 import BaseQuestion from './BaseQuestion';
 
 export default {
@@ -53,6 +54,11 @@ export class EslintConfigExecute extends BaseQuestion {
             from: /"extends": "react-app"/g,
             to: `"extends": "${this.answer}"`,
         });
+    };
+
+    [GENERATOR_TYPES.reactNative] = async() => {
+        await this.addEslintConfigToDevDeps();
+        
     };
 
     onPostInstall = async () => {

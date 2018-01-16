@@ -16,14 +16,14 @@ export class ReduxPersistExecute extends BaseQuestion {
         this.packages.push('redux-persist');
     }
 
-    universalFunction = async () => {
+    razzleAndCRAExecute = async () => {
         this.packages.push('redux-persist');
         this.stripSection = /\s\/\/ @crs-without-persist-start([\s\S]*?)\/\/ @crs-without-persist-end/gm;
         await this.replaceTemplate();
     };
 
-    [GENERATOR_TYPES.razzle] = () => this.universalFunction();
-    [GENERATOR_TYPES.createReactApp] = () => this.universalFunction();
+    [GENERATOR_TYPES.razzle] = () => this.razzleAndCRAExecute();
+    [GENERATOR_TYPES.createReactApp] = () => this.razzleAndCRAExecute();
 
     [GENERATOR_TYPES.reactNative] = async () => {
 

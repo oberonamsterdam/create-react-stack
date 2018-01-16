@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-constructor */
 import BaseQuestion from './BaseQuestion';
 
 export default {

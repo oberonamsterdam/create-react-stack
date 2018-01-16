@@ -1,6 +1,6 @@
 import path from 'path';
 import { PROMISIFIED_METHODS } from '../globals/constants';
-import { reactNative, reactNativeSnippets } from '../globals/snippets';
+import { reactNativeSnippets } from '../globals/snippets';
 import run from '../services/run';
 import BaseQuestion from './BaseQuestion';
 
@@ -20,7 +20,7 @@ export class MobileExec extends BaseQuestion {
     }
 
     default = async () => {
-        const { writeFile, mkdir, mv, rm, readFile } = PROMISIFIED_METHODS;
+        const { writeFile, mkdir, mv, readFile } = PROMISIFIED_METHODS;
         const componentsDir = path.join(this.src, 'components');
         await run(`npx create-react-native-app ${this.appname}`);
         // make src & components folder
@@ -40,6 +40,5 @@ export class MobileExec extends BaseQuestion {
         const npmPackageJson = await readFile(path.join(this.dir, 'package.json'), 'utf8');
         npmPackageJson.main = './component/App.js';
         await writeFile('package.json', npmPackageJson);
-
     };
 }

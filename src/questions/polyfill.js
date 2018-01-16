@@ -1,10 +1,10 @@
 import path from 'path';
 import replace from 'replace-in-file';
-import { GENERATOR_TYPES, PROMISIFIED_METHODS, QUESTION_TYPES } from '../globals/constants';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
+import { errors } from '../globals/snippets';
 import addRazzleMod from '../services/addRazzleMod';
 import log from '../services/log';
 import run from '../services/run';
-import { errors } from '../globals/snippets';
 import BaseQuestion from './BaseQuestion';
 
 export default {
