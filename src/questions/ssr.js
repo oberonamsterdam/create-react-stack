@@ -12,12 +12,7 @@ export default {
 };
 
 export class SsrExecute extends BaseQuestion {
-    constructor (data) {
-        super(data);
-        this.src = path.join(process.cwd(), this.answers.appname, 'src');
-        this.files = ['App.js', 'App.test.js', 'App.css'];
-        this.components = path.join(this.src, 'components');
-    }
+    files = ['App.js', 'App.test.js', 'App.css'];
 
     [GENERATOR_TYPES.razzle] = async () => {
         await this.initSsrSetup();

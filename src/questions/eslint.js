@@ -13,13 +13,12 @@ export default {
 };
 
 export class EslintExecute extends BaseQuestion {
-    constructor (data) {
-        super(data);
-    }
 
     default = async () => {
         this.devPackages.push('eslint');
-        this.devPackages.push('babel-eslint');
+        if (this.answers.mobile) {
+            this.devPackages.push('babel-eslint');
+        }
     };
 
     onPostInstall () {
@@ -27,10 +26,3 @@ export class EslintExecute extends BaseQuestion {
         log(chalk`Configure it or run {dim npx eslint .} manually to get linter output.`, 'warn');
     }
 }
-
-export const postInstall = ({ answer }) => {
-    if (answer) {
-        log(chalk`ESLint has been installed, but will still need to be configured in your IDE.`, 'warn');
-        log(chalk`Configure it or run {dim npx eslint .} manually to get linter output.`, 'warn');
-    }
-};

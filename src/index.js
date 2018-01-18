@@ -27,12 +27,12 @@ import { store } from './store/createStore';
 // TODO Make src/index.js class
 
 // TODO Expo implementation of the following questions:
-// TODO flow.js
-// TODO eslint.js
-// TODO eslint-config.js
-// TODO redux.js
-// TODO redux-persist.js
-// TODO ssr.js
+// TODO flow.js --
+// TODO eslint.js -- DONE
+// TODO eslint-config.js -- DONE
+// TODO redux.js -- DONE
+// TODO redux-persist.js -- DONE
+// TODO ssr.js -- N.V.T
 // TODO styled-components.js -- DONE
 
 class Main {
@@ -135,7 +135,6 @@ Please specify a name now:`,
                     if (!check.assigned(question)) {
                         return;
                     }
-                    console.log(currentGenerator);
                     if (!question.generators.includes(currentGenerator)) {
                         this.questionIndex++;
                         return traverseQuestions();
@@ -221,7 +220,7 @@ Please specify a name now:`,
                     this.postInstallFuncs.push(instance.onPostInstall);
                 }
 
-                // If no answer was given or answer was false (this is handy when you want to i.e remove certain template strings.
+                // If no answer was given or answer was false (this is handy when you want to i.e remove certain webTemplate strings.
                 if ((typeof answerKey === 'boolean' && answerKey === false) && !!instance.onNoAnswer) {
                     await instance.onNoAnswer();
                     continue;
@@ -234,7 +233,7 @@ Please specify a name now:`,
                         await instance.default();
 
                         // Retrieve packages that might be modified and set them to vars
-                        const { packages: packagesNew, devPackages: devPackagesNew } = instance.retrievePackages();
+                        const { packages: packagesNew, devPackages: devPackagesNew } = instance.getAllPackages;
                         this.packages = packagesNew;
                         this.devPackages = devPackagesNew;
 

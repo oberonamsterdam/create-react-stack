@@ -1,7 +1,7 @@
 import path from 'path';
 import replace from 'replace-in-file';
 import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
-import { reduxNoSsr, reduxSsr } from '../globals/snippets';
+import { reactNativeSnippets, reduxNoSsr, reduxSsr } from '../globals/snippets';
 import BaseQuestion from './BaseQuestion';
 
 export default {
@@ -11,14 +11,14 @@ export default {
 };
 
 export class ReduxExecute extends BaseQuestion {
+
+    appname = this.answers.appname;
+
+    webTemplate = path.resolve(path.join(__dirname, '..', 'templates', 'web-with-redux', 'src'));
+
     constructor (data) {
         super(data);
-        // bind stuff to this
-
-        this.appname = this.answers.appname;
         this.packages.push('redux', 'react-redux');
-        this.template = path.resolve(path.join(__dirname, '..', 'templates', 'web-with-redux', 'src'));
-        this.src = path.join(process.cwd(), this.appname, 'src');
     }
 
     [GENERATOR_TYPES.razzle] = async () => {
@@ -26,7 +26,7 @@ export class ReduxExecute extends BaseQuestion {
 
         await this.replaceRazzleSnippets();
 
-        await PROMISIFIED_METHODS.copy(path.join(this.template, 'components', `App${this.answers.flow ? '-with-flow' : ''}.js`), path.join(this.src, 'components', 'App.js'));
+        await PROMISIFIED_METHODS.copy(path.join(this.webTemplate, 'components', `App${this.answers.flow ? '-with-flow' : ''}.js`), path.join(this.src, 'components', 'App.js'));
 
         await this.copyCreateStoreTemplateFilesToSrc();
     };
@@ -38,7 +38,9 @@ export class ReduxExecute extends BaseQuestion {
     };
 
     [GENERATOR_TYPES.reactNative] = async () => {
-
+        const { writeFile } = PROMISIFIED_METHODS;
+        await writeFile(path.join(this.src, 'createStore.js'), reactNativeSnippets.createStore);
+        await writeFile(path.join(this.components, 'App.js'), reactNativeSnippets.appWithRedux);
     };
 
     replaceRazzleSnippets = async () => {
@@ -63,6 +65,6 @@ export class ReduxExecute extends BaseQuestion {
     };
 
     copyCreateStoreTemplateFilesToSrc = async () => {
-        await PROMISIFIED_METHODS.copy(path.join(this.template, 'createStore.js'), path.join(this.src, 'createStore.js'));
+        await PROMISIFIED_METHODS.copy(path.join(this.webTemplate, 'createStore.js'), path.join(this.src, 'createStore.js'));
     };
 }

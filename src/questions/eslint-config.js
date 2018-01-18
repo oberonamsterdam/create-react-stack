@@ -22,18 +22,10 @@ export default {
 };
 
 export class EslintConfigExecute extends BaseQuestion {
-    constructor (data) {
-        super(data);
-        this.appname = this.answers.appname;
-    }
+    appname = this.answers.appname;
 
     [GENERATOR_TYPES.razzle] = async () => {
-        await this.addEslintConfigToDevDeps();
-        await this.writeFile(path.join(process.cwd(), this.appname, '.eslintrc'), `
-{
-    "extends": "${this.answer}"
-}
-`);
+        await this.execReactNativeAndRazzle;
     };
 
     [GENERATOR_TYPES.createReactApp] = async () => {
@@ -56,15 +48,19 @@ export class EslintConfigExecute extends BaseQuestion {
         });
     };
 
-    [GENERATOR_TYPES.reactNative] = async() => {
+    [GENERATOR_TYPES.reactNative] = async () => {
+        await this.execReactNativeAndRazzle;
+    };
+
+    execReactNativeAndRazzle = async () => {
         await this.addEslintConfigToDevDeps();
-        
+        await this.createEslintRc();
     };
 
     onPostInstall = async () => {
         // attempt auto fix now that config etc is in place.
         console.log();
-        log('Attempting ESLint auto fix..', 'info');
+        log('💡  Running ESLint autofix for you..');
         console.log();
         try {
             await run('npx eslint --fix src', {
@@ -73,6 +69,14 @@ export class EslintConfigExecute extends BaseQuestion {
         } catch (ex) {
             log('ESLint auto fix failed! Check log above.', 'warn', ex);
         }
+    };
+
+    createEslintRc = async () => {
+        await this.writeFile(path.join(process.cwd(), this.appname, '.eslintrc'), `
+{
+    "extends": "${this.answer}"
+}
+`);
     };
 
     addEslintConfigToDevDeps = async () => {

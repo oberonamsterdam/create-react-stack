@@ -15,9 +15,10 @@ export default {
 };
 
 export class PolyFillExecute extends BaseQuestion {
+    appname = this.answers.appname;
+
     constructor (data) {
         super(data);
-        this.appname = this.answers.appname;
         this.packages.push('babel-polyfill');
     }
 

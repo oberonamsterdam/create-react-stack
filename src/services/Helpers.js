@@ -37,6 +37,8 @@ export const updateGenerator = (answers) => {
             });
         }
     } else {
-        // could not determine generator
+        if (!!mobileAnswer && !!webAnswer && !!answers.appname) {
+            throw new Error('Fatal error determining which generator to use.');
+        }
     }
 };

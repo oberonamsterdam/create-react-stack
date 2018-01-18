@@ -11,13 +11,8 @@ export default {
 };
 
 export class MobileExec extends BaseQuestion {
-    constructor (data) {
-        super(data);
-        this.appname = this.answers.appname;
-        this.files = ['App.js', 'App.test.js'];
-        this.dir = path.join(process.cwd(), this.appname);
-        this.src = path.join(this.dir, 'src');
-    }
+    appname = this.answers.appname;
+    files = ['App.js', 'App.test.js'];
 
     default = async () => {
         const { writeFile, mkdir, mv, readFile } = PROMISIFIED_METHODS;
@@ -27,18 +22,19 @@ export class MobileExec extends BaseQuestion {
         await mkdir(this.src);
         await mkdir(componentsDir);
 
-        // replace App.js with template
+        // replace App.js with webTemplate
         await writeFile(path.join(this.dir, 'App.js'), reactNativeSnippets.app);
 
         // move files into src/components
         for (const file of this.files) {
-            await mv(path.join(this.dir, file), componentsDir);
+            await mv(path.join(this.dir, file), path.join(componentsDir, file));
         }
 
         // Get package.json and edit the object returned, then overwrite the entirity of package.json
         // This is for changing the new entry point for expo.
-        const npmPackageJson = await readFile(path.join(this.dir, 'package.json'), 'utf8');
-        npmPackageJson.main = './component/App.js';
-        await writeFile('package.json', npmPackageJson);
+        let npmPackageJson = await readFile(path.join(this.dir, 'package.json'), 'utf8');
+        npmPackageJson = JSON.parse(npmPackageJson);
+        npmPackageJson.main = './src/components/App.js';
+        await writeFile(path.join(this.dir, 'package.json'), JSON.stringify(npmPackageJson));
     };
 }

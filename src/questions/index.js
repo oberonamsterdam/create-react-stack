@@ -56,25 +56,25 @@ const questions = {
         question: reduxQuestion,
         execute: ReduxExecute,
         type: redux,
-        generators: generators.web,
+        generators: generators.all,
     },
     [reduxPersist]: {
         question: reduxPersistQuestion,
         execute: ReduxPersistExecute,
         type: reduxPersist,
-        generators: generators.web,
+        generators: generators.all,
     },
     [eslint]: {
         question: eslintQuestion,
         execute: EslintExecute,
         type: eslint,
-        generators: generators.web,
+        generators: generators.all,
     },
     [eslintConfig]: {
         question: eslintConfigQuestion,
         execute: EslintConfigExecute,
         type: eslintConfig,
-        generators: generators.web,
+        generators: generators.all,
 
     },
     [polyfill]: {

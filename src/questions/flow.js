@@ -13,14 +13,11 @@ export default {
 };
 
 export class FlowExecute extends BaseQuestion {
-    constructor (data) {
-        super(data);
-        this.mobile = this.answers.mobile;
-        this.appname = this.answers.appname;
-        this.dir = path.join(process.cwd(), this.appname);
-    }
+    mobile = this.answers.mobile;
+    appname = this.answers.appname;
 
     default = async () => {
+        // TODO note: change hardcoded version before release
         this.devPackages.push('flow-bin@0.56.0');
     };
 
