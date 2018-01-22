@@ -1,13 +1,11 @@
 import path from 'path';
 import replace from 'replace-in-file';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
+import { errors } from '../globals/snippets';
 import addRazzleMod from '../services/addRazzleMod';
 import log from '../services/log';
 import run from '../services/run';
-import chalk from 'chalk';
-import promisify from 'es6-promisify';
-import fs from 'fs';
-
-const rm = promisify(fs.unlink);
+import BaseQuestion from './BaseQuestion';
 
 export default {
     type: 'confirm',
@@ -16,31 +14,38 @@ export default {
     when: ({ mobile }) => !mobile,
 };
 
-export const execute = async ({ answer, answers: { ssr, appname, eslintConfig }, packages }) => {
-    if (answer) {
-        if (ssr) {
-            packages.push('oberon-razzle-modifications');
-            await addRazzleMod(appname);
-            await replace({
-                from: /const usePolyfill = false;/,
-                to: 'const usePolyfill = true;',
-                files: path.join(process.cwd(), appname, 'razzle.config.js'),
-            });
-        } else {
-            if (eslintConfig === 'react-app') {
-                log(chalk`You indicated that you wanted to use {dim babel-polyfill} instead of the default polyfill. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
-                await run('npm run eject', {
-                    cwd: path.join(process.cwd(), appname),
-                });
-            }
-            await replace({
-                from: /require\.resolve\('.\/polyfills'\)/g,
-                to: 'require.resolve(\'babel-polyfill\')',
-                files: ['webpack.config.dev.js', 'webpack.config.prod.js'].map(config => path.join(process.cwd(), appname, 'config', config)),
-            });
-            await rm(path.join(process.cwd(), appname, 'config', 'polyfills.js'));
-        }
+export class PolyFillExecute extends BaseQuestion {
+    appname = this.answers.appname;
 
-        packages.push('babel-polyfill');
+    constructor (data) {
+        super(data);
+        this.packages.push('babel-polyfill');
     }
-};
+
+    [GENERATOR_TYPES.razzle] = async () => {
+        this.packages.push('oberon-razzle-modifications');
+        await addRazzleMod(this.appname);
+        await replace({
+            from: /const usePolyfill = false;/,
+            to: 'const usePolyfill = true;',
+            files: path.join(process.cwd(), this.appname, 'razzle.config.js'),
+        });
+    };
+
+    [GENERATOR_TYPES.createReactApp] = async () => {
+        log(errors.ejectCRA, 'warn');
+        await run('npm run eject', {
+            cwd: path.join(process.cwd(), this.appname),
+        });
+        await this.editWebpackConfigAndRemovePolyfillFile();
+    };
+
+    editWebpackConfigAndRemovePolyfillFile = async () => {
+        await replace({
+            from: /require\.resolve\('.\/polyfills'\)/g,
+            to: 'require.resolve(\'babel-polyfill\')',
+            files: ['webpack.config.dev.js', 'webpack.config.prod.js'].map(config => path.join(process.cwd(), this.appname, 'config', config)),
+        });
+        await PROMISIFIED_METHODS.rm(path.join(process.cwd(), this.appname, 'config', 'polyfills.js'));
+    };
+}
