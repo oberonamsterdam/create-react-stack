@@ -7,7 +7,7 @@
         "start": "BACKPACK_ENTRY=index backpack",
         "snapshots": "BACKPACK_ENTRY=createSnapshots backpack",
         "build": "BACKPACK_ENTRY=index backpack build && ./prepend-shebang.sh",
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "NODE_ENV=test jest",
         "prepublish": "npm run build"
     },
     "bin": "build/main.js",
@@ -22,6 +22,7 @@
         "fs-extra": "^4.0.1",
         "globby": "^6.1.0",
         "inquirer": "^3.2.3",
+        "jest": "^22.1.4",
         "node-cmd": "^3.0.0",
         "replace-in-file": "^2.6.4"
     },
@@ -36,5 +37,14 @@
     },
     "repository": {
         "url": "http://github.com/oberonamsterdam/create-react-stack"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "transformIgnorePatterns": [
+            "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
+        ],
+        "globals": {
+            "__DEV__": true
+        }
     }
 }
