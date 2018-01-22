@@ -50,7 +50,7 @@ const questions = {
         question: flowQuestion,
         execute: FlowExecute,
         type: flow,
-        generators: generators.web,
+        generators: generators.all,
     },
     [redux]: {
         question: reduxQuestion,

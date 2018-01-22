@@ -3,7 +3,6 @@ import path from 'path';
 import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
 import { flowReactNative } from '../globals/snippets';
 import log from '../services/log';
-import run from '../services/run';
 import BaseQuestion from './BaseQuestion';
 
 export default {
@@ -17,8 +16,7 @@ export class FlowExecute extends BaseQuestion {
     appname = this.answers.appname;
 
     default = async () => {
-        // TODO note: change hardcoded version before release
-        this.devPackages.push('flow-bin@0.56.0');
+        this.devPackages.push('flow-bin');
     };
 
     onPostInstall = async () => {
@@ -43,9 +41,7 @@ export class FlowExecute extends BaseQuestion {
 
     runFlowTyped = async () => {
         // automatically type dependencies to avoid flow throwing errors on startup
-        await run('npx flow-typed install', {
-            cwd: path.join(process.cwd(), this.appname),
-        });
+        await this.commands.push(['npx flow-typed install', { cwd: path.join(process.cwd(), this.appname) }]);
     };
 
     runFlow = async () => {
@@ -53,8 +49,6 @@ export class FlowExecute extends BaseQuestion {
         log(`👮  Running flow..`);
         console.log();
 
-        await run(`node ${path.join('.', 'node_modules', '.bin', 'flow')}`, {
-            cwd: this.dir,
-        });
+        await this.commands.push([`node ${path.join('.', 'node_modules', '.bin', 'flow')}`, { cwd: this.dir }]);
     };
 }

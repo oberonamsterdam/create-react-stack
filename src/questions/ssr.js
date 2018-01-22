@@ -1,7 +1,7 @@
 import path from 'path';
 import replace from 'replace-in-file';
-import { GENERATOR_TYPES } from '../globals/constants';
-import run from '../services/run';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
+import { store } from '../store/createStore';
 import BaseQuestion from './BaseQuestion';
 
 export default {
@@ -13,6 +13,7 @@ export default {
 
 export class SsrExecute extends BaseQuestion {
     files = ['App.js', 'App.test.js', 'App.css'];
+    appname = this.answers.appname;
 
     [GENERATOR_TYPES.razzle] = async () => {
         await this.initSsrSetup();
@@ -27,33 +28,40 @@ export class SsrExecute extends BaseQuestion {
     };
 
     replaceFiles = async (files) => {
-        await replace({
-            files: [files],
-            from: /import App from '\.\/App';/g,
-            to: 'import App from \'./components/App\'',
-        });
+        try {
+            await replace({
+                files: files,
+                from: /import App from '\.\/App';/g,
+                to: 'import App from \'./components/App\'',
+            });
+        } catch (Err) {
+            console.log(Err);
+        }
     };
 
     moveFiles = async () => {
-        const promises = [];
+        const { mv } = PROMISIFIED_METHODS;
         for (const file of this.files) {
-            promises.push(this.mv(path.join(this.src, file), path.join(this.components, file)));
+            await mv(path.join(this.src, file), path.join(this.components, file));
         }
-        await Promise.all(promises);
     };
 
     initSsrSetup = async () => {
-        await run(`npx ${this.generator} ${this.appname}`);
+        const { generator } = store.getState();
+        const { mkdir } = PROMISIFIED_METHODS;
+        await this.commands.push([`npx ${generator} ${this.appname}`]);
 
-        if (this.generator === GENERATOR_TYPES.razzle) {
+
+        if (generator === GENERATOR_TYPES.razzle) {
             this.files = [...this.files, 'Home.js', 'Home.css', 'react.svg'];
         }
-        if (this.generator === GENERATOR_TYPES.createReactApp) {
+        if (generator === GENERATOR_TYPES.createReactApp) {
             this.files = [...this.files, 'logo.svg'];
         }
 
+
         // make components dir
-        await this.mkdir(this.components);
+        await mkdir(this.components);
 
         // move files into dir
         await this.moveFiles();

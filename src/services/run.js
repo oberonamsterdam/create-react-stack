@@ -10,6 +10,11 @@ export default (command, options = {}) => {
 
     log('services/run', 'debug', command, options);
     return new Promise((resolve, reject) => {
+
+        if (!command) {
+            log(command, 'error', options);
+        }
+
         const child = cp.spawn(cmd, args, {
             stdio: 'inherit',
             shell: true,

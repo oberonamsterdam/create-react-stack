@@ -4,7 +4,6 @@ import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
 import { errors } from '../globals/snippets';
 import addRazzleMod from '../services/addRazzleMod';
 import log from '../services/log';
-import run from '../services/run';
 import BaseQuestion from './BaseQuestion';
 
 export default {
@@ -34,13 +33,7 @@ export class PolyFillExecute extends BaseQuestion {
 
     [GENERATOR_TYPES.createReactApp] = async () => {
         log(errors.ejectCRA, 'warn');
-        await run('npm run eject', {
-            cwd: path.join(process.cwd(), this.appname),
-        });
-        await this.editWebpackConfigAndRemovePolyfillFile();
-    };
-
-    editWebpackConfigAndRemovePolyfillFile = async () => {
+        await this.commands.push(['npm run eject', { cwd: path.join(process.cwd(), this.appname) }]);
         await replace({
             from: /require\.resolve\('.\/polyfills'\)/g,
             to: 'require.resolve(\'babel-polyfill\')',

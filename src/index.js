@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-
 import chalk from 'chalk';
 import check from 'check-types';
 import program from 'commander';
@@ -13,27 +12,6 @@ import { checkForValidAppname, updateGenerator } from './services/Helpers';
 import log from './services/log';
 import run from './services/run';
 import { store } from './store/createStore';
-
-/*
-* Some todos
-* */
-// TODO implement postInstall as a method on question classes. do this by adding all postInstall methods to an array and calling them afterwards. DONE
-// TODO fix imports at questions/index.js DONE
-// TODO breaks atm. command not found: flow @ flow.js DONE (needs testing)
-
-// TODO write tests..
-
-// TODO expo implementation / check on all questions.
-// TODO Make src/index.js class
-
-// TODO Expo implementation of the following questions:
-// TODO flow.js --
-// TODO eslint.js -- DONE
-// TODO eslint-config.js -- DONE
-// TODO redux.js -- DONE
-// TODO redux-persist.js -- DONE
-// TODO ssr.js -- N.V.T
-// TODO styled-components.js -- DONE
 
 class Main {
     constructor () {
@@ -107,8 +85,6 @@ Please specify a name now:`,
         this.answers = await new Promise((resolve, reject) => {
             const onNext = async ({ name, answer }) => {
                 let answers = store.getState().answers;
-                // TODO clean this up, this is for mobile to check if the appname is valid
-                // TODO because of react-native-cli's policy on alphanumeric only appnames.
                 if (name === QUESTION_TYPES.mobile && answer === true) {
                     checkForValidAppname(answers.appname);
                 }
@@ -195,61 +171,84 @@ Please specify a name now:`,
     };
 
     runQuestionExecs = async () => {
+        console.log(this.answers);
         for (const answerKey of Object.keys(this.answers)) {
             const answer = this.answers[answerKey];
             if (answerKey !== QUESTION_TYPES.appname) {
                 const Exec = questions[answerKey].execute;
                 const state = store.getState();
+                // intercept push to commands array and run command
+                const proxiedCommandsArray = [];
+                proxiedCommandsArray.push = async function () {
+                    const command = arguments[0];
+                    if (command) {
+                        // add arguments via array order i.e ['npm run myScript', {cwd: process.cwd()}]
+                        await run.apply(this, command);
+                    }
+                    return Array.prototype.push.apply(this, arguments);
+                };
                 const params = {
                     answers: this.answers,
                     packages: this.packages,
                     devPackages: this.devPackages,
                     answer: answer,
                     state,
+                    proxiedCommandsArray,
                 };
-                const currentGenerator = state.generator;
                 const instance = new Exec(params);
 
-                // onPreInstall, handy if you need to set up things and want to use lifecycle things (you could also just use the constructor, but the option is nice to have.
-                if (typeof instance.onPreInstall === 'function') {
-                    await instance.onPreInstall();
-                }
+                if ((typeof answer === 'boolean' && answer === true) || (answerKey === QUESTION_TYPES.ssr)) {
+                    // onPreInstall, handy if you need to set up things and want to use lifecycle things (you could also just use the constructor, but the option is nice to have.
+                    if (typeof instance.onPreInstall === 'function') {
+                        await instance.onPreInstall();
+                    }
 
-                // Push onPostInstall if function to functions array to be run, well, post install.
-                if (typeof instance.onPostInstall === 'function') {
-                    this.postInstallFuncs.push(instance.onPostInstall);
+                    // Push onPostInstall if function to functions array to be run, well, post install.
+                    if (typeof instance.onPostInstall === 'function') {
+                        this.postInstallFuncs.push(instance.onPostInstall);
+                    }
                 }
-
                 // If no answer was given or answer was false (this is handy when you want to i.e remove certain webTemplate strings.
-                if ((typeof answerKey === 'boolean' && answerKey === false) && !!instance.onNoAnswer) {
-                    await instance.onNoAnswer();
+                if ((typeof answer === 'boolean' && answer === false) && (answerKey !== QUESTION_TYPES.ssr)) {
+                    if (typeof instance.onNoAnswer === 'function') {
+                        await instance.onNoAnswer();
+                    }
                     continue;
                 }
 
-                // If using default function or something else is wrong
-                if (!instance[currentGenerator]) {
-                    if (typeof instance.default === 'function') {
-                        // Run default method
-                        await instance.default();
+                const { generator: currentGenerator } = store.getState();
+
+                if ((typeof answer === 'boolean' && answer === true) || (answerKey === QUESTION_TYPES.ssr)) {
+                    // If using default function or something else is wrong
+                    console.log('executing..:', answerKey);
+
+                    if (!instance[currentGenerator]) {
+                        if (typeof instance.default === 'function') {
+                            // Run default method
+                            await instance.default();
+
+                            // Retrieve packages that might be modified and set them to vars
+                            const { packages: packagesNew, devPackages: devPackagesNew } = instance.getAllPackages;
+                            this.packages = packagesNew;
+                            this.devPackages = devPackagesNew;
+
+                            // Next question.
+                            continue;
+                        } else {
+                            log(`No runnable function found at question: ${questions[answerKey]}. This should be a function.`, 'debug');
+                            continue;
+                        }
+                    }
+
+                    // If everything is fine
+                    if (instance[currentGenerator]) {
+                        await instance[currentGenerator]();
 
                         // Retrieve packages that might be modified and set them to vars
                         const { packages: packagesNew, devPackages: devPackagesNew } = instance.getAllPackages;
                         this.packages = packagesNew;
                         this.devPackages = devPackagesNew;
-
-                        // Next question.
-                        continue;
-                    } else {
-                        if (process.env.DEBUG === 1) {
-                            log(`No runnable function found at question: ${questions[answerKey]}. This should be a function.`, 'debug');
-                        }
-                        continue;
                     }
-                }
-
-                // If everything is fine
-                if (instance[currentGenerator]) {
-                    await instance[currentGenerator]();
                 }
             }
         }
@@ -313,7 +312,7 @@ Please specify a name now:`,
     const programInstance = new Main();
     await programInstance.init();
     // Process doesn't exit because it's a child process of backpack (but does exit if directly run)
-    process.exit();
+    process.exit(0);
 })().catch(err => {
     log(err, 'error');
     process.exit(1);

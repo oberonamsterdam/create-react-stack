@@ -13,12 +13,19 @@ The basequestion class adds certain values to `this`. During runtime certain lif
 * `onPreInstall` -- Called before install.
 
 #### Inherited methods from BaseQuestion:
-* `retrievePackages` -- returns an object containing `packages` and `devPackages`
+* `getAllPackages` -- Returns an object containing `packages` and `devPackages`.
+* `getAllCommands` -- Returns `this.commands`.
 
 #### Values binded to this from BaseQuestion:
-* `this.data` -- object containing `state, answers, answer, packages, devPackages`
+* `this.commands` -- An array with push extended to be async, parameters of push should be in an array in the correct order and should contain parameters for the `run` function. Example:
+```javascript
+(async() => {
+    await this.commands.push(['npx flow-typed install', { cwd: process.cwd() }]);
+})()
+```
+* `this.data` -- Object containing `state, answers, answer, packages, devPackages`.
 * `this.answers` -- All the answers that have been given.
 * `this.state` -- The current state.
-* `this.answer` -- The answer for this specific question
+* `this.answer` -- The answer for this specific question.
 * `this.packages` -- The packages array filled with which packages to install.
 * `this.devPackages` -- Same as packages array but filled with devPackages to install.

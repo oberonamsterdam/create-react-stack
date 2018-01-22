@@ -1,7 +1,7 @@
 import path from 'path';
 import replace from 'replace-in-file';
 import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
-import { reactNativeSnippets, reduxNoSsr, reduxSsr } from '../globals/snippets';
+import { reduxNoSsr, reduxSsr } from '../globals/snippets';
 import BaseQuestion from './BaseQuestion';
 
 export default {
@@ -11,10 +11,8 @@ export default {
 };
 
 export class ReduxExecute extends BaseQuestion {
-
     appname = this.answers.appname;
-
-    webTemplate = path.resolve(path.join(__dirname, '..', 'templates', 'web-with-redux', 'src'));
+    templateDir = path.join(this.reactNativeTemplate, 'redux');
 
     constructor (data) {
         super(data);
@@ -22,25 +20,25 @@ export class ReduxExecute extends BaseQuestion {
     }
 
     [GENERATOR_TYPES.razzle] = async () => {
+        const { copy } = PROMISIFIED_METHODS;
         this.packages.push('serialize-javascript');
 
         await this.replaceRazzleSnippets();
 
-        await PROMISIFIED_METHODS.copy(path.join(this.webTemplate, 'components', `App${this.answers.flow ? '-with-flow' : ''}.js`), path.join(this.src, 'components', 'App.js'));
+        await copy(path.join(this.webTemplate, `App${this.answers.flow ? '-with-flow' : ''}.js`), path.join(this.components, 'App.js'));
 
         await this.copyCreateStoreTemplateFilesToSrc();
     };
 
     [GENERATOR_TYPES.createReactApp] = async () => {
         await this.replaceCRASnippets();
-
         await this.copyCreateStoreTemplateFilesToSrc();
     };
 
     [GENERATOR_TYPES.reactNative] = async () => {
-        const { writeFile } = PROMISIFIED_METHODS;
-        await writeFile(path.join(this.src, 'createStore.js'), reactNativeSnippets.createStore);
-        await writeFile(path.join(this.components, 'App.js'), reactNativeSnippets.appWithRedux);
+        const { copy } = PROMISIFIED_METHODS;
+        await copy(path.join(this.templateDir, 'createStore.js'), path.join(this.src, 'createStore.js'));
+        await copy(path.join(this.templateDir, 'App-redux.js'), path.join(this.components, 'App.js'));
     };
 
     replaceRazzleSnippets = async () => {

@@ -5,7 +5,6 @@ import replace from 'replace-in-file';
 import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
 import { errors } from '../globals/snippets';
 import log from '../services/log';
-import run from '../services/run';
 import { store } from '../store/createStore';
 import BaseQuestion from './BaseQuestion';
 
@@ -37,9 +36,7 @@ export class EslintConfigExecute extends BaseQuestion {
             createReactAppEjected: true,
         });
 
-        await run('npm run eject', {
-            cwd: path.join(process.cwd(), this.appname),
-        });
+        await this.commands.push(['npm run eject', { cwd: path.join(process.cwd(), this.appname) }]);
 
         await replace({
             files: path.join(process.cwd(), this.appname, 'package.json'),
@@ -63,9 +60,8 @@ export class EslintConfigExecute extends BaseQuestion {
         log('💡  Running ESLint autofix for you..');
         console.log();
         try {
-            await run('npx eslint --fix src', {
-                cwd: path.join(process.cwd(), this.appname),
-            });
+            await this.commands.push(['npx eslint --fix src', { cwd: path.join(process.cwd(), this.appname) }]);
+            log(`✅  No ESLint errors found! :)`);
         } catch (ex) {
             log('ESLint auto fix failed! Check log above.', 'warn', ex);
         }

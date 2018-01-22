@@ -1,19 +1,19 @@
 import path from 'path';
 import replace from 'replace-in-file';
 import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
-import { reactNativeSnippets } from '../globals/snippets';
 import BaseQuestion from './BaseQuestion';
 
 export default {
     type: 'confirm',
     name: 'reduxPersist',
     message: 'Use redux-persist? (https://github.com/rt2zz/redux-persist)',
-    // If ssr or expo & redux
-    // TODO implement CRA for this!
-    when: ({ reduxSsr, mobile, redux } ) => (!!reduxSsr || (!!mobile && redux)),
+    // no redux-persist if no redux.
+    when: ({ reduxSsr, mobile, redux }) => (!!redux),
 };
 
 export class ReduxPersistExecute extends BaseQuestion {
+    templateDir = path.join(this.reactNativeTemplate, 'redux-persist');
+
     constructor (data) {
         super(data);
         this.packages.push('redux-persist');
@@ -29,9 +29,9 @@ export class ReduxPersistExecute extends BaseQuestion {
     [GENERATOR_TYPES.createReactApp] = () => this.razzleAndCRAExecute();
 
     [GENERATOR_TYPES.reactNative] = async () => {
-        const { writeFile } = PROMISIFIED_METHODS;
-        await writeFile(path.join(this.src, 'createStore.js'), reactNativeSnippets.createStoreWithPersist);
-        await writeFile(path.join(this.components, 'App.js'), reactNativeSnippets.appWithReduxPersist);
+        const { copy } = PROMISIFIED_METHODS;
+        await copy(path.join(this.templateDir, 'createStore.js'), path.join(this.src, 'createStore.js'));
+        await copy(path.join(this.templateDir, 'App.js'), path.join(this.components, 'App.js'));
     };
 
     onNoAnswer = async () => {

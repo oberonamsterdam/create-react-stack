@@ -1,7 +1,5 @@
 import path from 'path';
 import { PROMISIFIED_METHODS } from '../globals/constants';
-import { reactNativeSnippets } from '../globals/snippets';
-import run from '../services/run';
 import BaseQuestion from './BaseQuestion';
 
 export default {
@@ -15,15 +13,15 @@ export class MobileExec extends BaseQuestion {
     files = ['App.js', 'App.test.js'];
 
     default = async () => {
-        const { writeFile, mkdir, mv, readFile } = PROMISIFIED_METHODS;
+        const { writeFile, mkdir, mv, readFile, copy } = PROMISIFIED_METHODS;
         const componentsDir = path.join(this.src, 'components');
-        await run(`npx create-react-native-app ${this.appname}`);
+        await this.commands.push([`npx create-react-native-app ${this.appname}`]);
         // make src & components folder
         await mkdir(this.src);
         await mkdir(componentsDir);
 
-        // replace App.js with webTemplate
-        await writeFile(path.join(this.dir, 'App.js'), reactNativeSnippets.app);
+        // replace App.js with our template
+        await copy(path.join(this.reactNativeTemplate, 'default', 'App.js'), path.join(this.dir, 'App.js'));
 
         // move files into src/components
         for (const file of this.files) {

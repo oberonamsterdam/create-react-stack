@@ -8,9 +8,12 @@ export default class BaseQuestion {
         this.answer = data.answer;
         this.packages = data.packages;
         this.devPackages = data.devPackages;
-        this.src = path.join(process.cwd(), this.answers.appname, 'src');
         this.dir = path.join(process.cwd(), this.answers.appname);
+        this.src = path.join(this.dir, 'src');
         this.components = path.join(this.src, 'components');
+        this.commands = data.proxiedCommandsArray;
+        this.reactNativeTemplate = path.resolve(path.join(__dirname, '..', 'templates', 'react-native'));
+        this.webTemplate = path.resolve(path.join(__dirname, '..', 'templates', 'web'));
     }
 
     // This function is used to retrieve the packages (that may have been modified) from the current instance and
@@ -20,5 +23,9 @@ export default class BaseQuestion {
             packages: this.packages,
             devPackages: this.devPackages,
         };
-    };
+    }
+
+    get getAllCommands () {
+        return this.commands;
+    }
 }

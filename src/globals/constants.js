@@ -21,6 +21,8 @@ export const QUESTION_TYPES = {
     styledComponents: 'styledComponents',
 };
 
+export const __DEV__ = process.env.DEBUG === '1';
+
 export const PROMISIFIED_METHODS = {
     writeFile: promisify(fs.writeFile),
     readFile: promisify(fs.readFile),

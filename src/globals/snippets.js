@@ -51,17 +51,18 @@ export const reduxNoSsr = {
 export const flowReactNative = {
     flowConfig: `
 [ignore]
-.*/node_modules/.*
+<PROJECT_ROOT>/node_modules/.*
+
 [include]
 
 [libs]
-flow-typed/npm
-node_modules/react-native/Libraries/react-native/react-native-interface.js
-node_modules/react-native/flow/
-node_modules/expo/flow/
+./flow-typed/npm
 
-[version]
-^0.56.0
+[lints]
+
+[options]
+
+[strict]
 `,
     flowTyped: `
 // @flow
@@ -73,135 +74,6 @@ declare module 'react-native' {
 };
 
 export const reactNativeSnippets = {
-    app: `import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { registerRootComponent } from 'expo';
-
-class App extends React.Component {
-    render () {
-        return (
-            <View style={styles.container}>
-                <Text>Open up App.js to start working on your app!</Text>
-                <Text>Changes you make will automatically reload.</Text>
-                <Text>Shake your phone to open the developer menu.</Text>
-            </View>
-        );
-    }
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
-
-export default registerRootComponent(App);`,
-
-    appWithRedux: `import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { registerRootComponent } from 'expo';
-import { store } from '../createStore.js';
-
-class App extends React.Component {
-    render () {
-        return (
-            <Provider store={store}>
-                <View style={styles.container}>
-                    <Text>Open up App.js to start working on your app!</Text>
-                    <Text>Changes you make will automatically reload.</Text>
-                    <Text>Shake your phone to open the developer menu.</Text>
-                </View>
-            </Provider>
-        );
-    }
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
-
-export default registerRootComponent(App);`,
-
-    createStore: `import { combineReducers, compose, createStore } from 'redux';
-
-const initialState = {};
-
-export const store = createStore(
-    combineReducers({
-        // add your reducers here
-    }),
-    initialState,
-    compose(
-        // add your middleware here
-    ),
-);`,
-    createStoreWithPersist: `import { combineReducers, compose, createStore } from 'redux';
-import { persistReducer, persistStore } from 'redux-persist';
-import AsyncStorage from 'redux-persist/lib/storage';
-
-const initialState = {};
-const persistConfig = {
-    key: '__ROOT__',
-    storage: AsyncStorage,
-};
-const rootReducer = combineReducers({
-    myReducer: (state = {}, action) => ({ ...state, action }),
-});
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
-const store = createStore(
-    persistedReducer,
-    initialState,
-    compose(),
-);
-
-const persistor = persistStore(store);
-
-export { store, persistor };`,
-    appWithReduxPersist: `import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { registerRootComponent } from 'expo';
-import { store, persistor } from '../createStore.js';
-import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/es/integration/react'
-
-// Your loading view before redux-persist has rehydrated store
-const Loading = () => null;
-
-class App extends React.Component {
-    render () {
-        return (
-            <Provider store={store}>
-                <PersistGate persistor={persistor} loading={<Loading/>}>
-                    <View style={styles.container}>
-                        <Text>Open up App.js to start working on your app!</Text>
-                        <Text>Changes you make will automatically reload.</Text>
-                        <Text>Shake your phone to open the developer menu.</Text>
-                    </View>
-                </PersistGate>
-            </Provider>
-        );
-    }
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
-
-export default registerRootComponent(App);`,
 };
 
 export const errors = {
