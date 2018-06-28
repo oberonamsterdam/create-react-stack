@@ -1,8 +1,8 @@
-import fs from 'fs-extra';
-import globby from 'globby';
 import path from 'path';
 import replace from 'replace-in-file';
-import log from '../services/log';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
+import { reduxNoSsr, reduxSsr } from '../globals/snippets';
+import BaseQuestion from './BaseQuestion';
 
 export default {
     type: 'confirm',
@@ -10,87 +10,59 @@ export default {
     message: 'Use redux? (http://redux.js.org/)',
 };
 
-export const execute = async ({ answer, answers: { appname, ssr, flow, mobile }, packages }) => {
-    if (answer) {
-        packages.push('redux', 'react-redux');
+export class ReduxExecute extends BaseQuestion {
+    appname = this.answers.appname;
+    templateDir = path.join(this.reactNativeTemplate, 'redux');
+
+    constructor (data) {
+        super(data);
+        this.packages.push('redux', 'react-redux');
     }
 
-    if (answer && !mobile) {
-        const template = path.resolve(path.join(__dirname, '..', 'templates', 'web-with-redux', 'src'));
-        const src = path.join(process.cwd(), appname, 'src');
+    [GENERATOR_TYPES.razzle] = async () => {
+        const { copy } = PROMISIFIED_METHODS;
+        this.packages.push('serialize-javascript');
 
-        if (ssr) {
-            packages.push('serialize-javascript');
+        await this.replaceRazzleSnippets();
 
-            await replace({
-                from: [
-                    /const context = {};/gm,
-                    /<script src="\${assets\.client\.js}" defer><\/script>/gm,
-                    /import React from 'react';/gm,
-                    /<App \/>/gm,
-                    /\.get\('\/\*', \(/g,
-                ],
-                to: [
-                    `const context = {};
-        const store = await createStore();`,
-                    `<script>window.__initialState = \${serialize(store.getState())};</script>
-<script src="\${assets.client.js}" defer></script>`,
-                    `import React from 'react';
-import createStore from './createStore';
-import serialize from 'serialize-javascript';`,
-                    '<App store={store} />',
-                    '.get(\'/*\', async (',
-                ],
-                files: path.join(process.cwd(), appname, 'src', 'server.js'),
-            });
+        await copy(path.join(this.webTemplate, `App${this.answers.flow ? '-with-flow' : ''}.js`), path.join(this.components, 'App.js'));
 
-            await replace({
-                from: [
-                    /\nrender/g,
-                    /<App \/>/g,
-                    /\s$/g,
-                ],
-                to: [
-                    'import createStore from \'./createStore\';\n\ncreateStore(window.__initialState).then(store => {\nrender',
-                    '<App store={store} />',
-                    '\n});',
-                ],
-                files: path.join(process.cwd(), appname, 'src', 'client.js'),
-            });
+        await this.copyCreateStoreTemplateFilesToSrc();
+    };
 
-            await fs.copy(path.join(template, 'components', `App${flow ? '-with-flow' : ''}.js`), path.join(src, 'components', 'App.js'));
-        } else {
-            await replace({
-                from: [
-                    /<App \/>/g,
-                    /\nReactDOM/g,
-                    /registerServiceWorker\(\)/g,
-                ],
-                to: [
-                    '<Provider store={store}><App /></Provider>',
-                    'import createStore from \'./createStore\';\nimport { Provider } from \'react-redux\';\n\ncreateStore(window.__initialState).then(store => {\nReactDOM',
-                    '});\nregisterServiceWorker()',
-                ],
-                files: path.join(process.cwd(), appname, 'src', 'index.js'),
-            });
-        }
+    [GENERATOR_TYPES.createReactApp] = async () => {
+        await this.replaceCRASnippets();
+        await this.copyCreateStoreTemplateFilesToSrc();
+    };
 
-        await fs.copy(path.join(template, 'createStore.js'), path.join(src, 'createStore.js'));
-    } else if (mobile) {
-        const template = path.join(__dirname, '..', 'templates', 'react-native', answer ? 'with-redux' : 'without-redux');
-        const appDir = path.join(process.cwd(), appname);
-        const files = await globby(path.join(template, '**/*.js'));
-        const promises = [];
-        for (const from of files) {
-            const to = path.join(appDir, path.relative(template, from));
-            log('Copying', 'debug', from, 'to', to);
-            promises.push(fs.copy(from, to));
-        }
-        await Promise.all(promises);
+    [GENERATOR_TYPES.reactNative] = async () => {
+        const { copy } = PROMISIFIED_METHODS;
+        await copy(path.join(this.templateDir, 'createStore.js'), path.join(this.src, 'createStore.js'));
+        await copy(path.join(this.templateDir, 'App-redux.js'), path.join(this.components, 'App.js'));
+    };
+
+    replaceRazzleSnippets = async () => {
         await replace({
-            from: /%appname%/g,
-            to: appname,
-            files: path.join(process.cwd(), appname, 'index.js'),
+            from: [reduxSsr.server.from],
+            to: [reduxSsr.server.to],
+            files: path.join(process.cwd(), this.appname, 'src', 'server.js'),
         });
-    }
-};
+        await replace({
+            from: [reduxSsr.client.from],
+            to: [reduxSsr.client.to],
+            files: path.join(process.cwd(), this.appname, 'src', 'client.js'),
+        });
+    };
+
+    replaceCRASnippets = async () => {
+        await replace({
+            from: [reduxNoSsr.index.from],
+            to: [reduxNoSsr.index.from],
+            files: path.join(process.cwd(), this.appname, 'src', 'index.js'),
+        });
+    };
+
+    copyCreateStoreTemplateFilesToSrc = async () => {
+        await PROMISIFIED_METHODS.copy(path.join(this.webTemplate, 'createStore.js'), path.join(this.src, 'createStore.js'));
+    };
+}

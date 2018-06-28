@@ -4,6 +4,7 @@
     "description": "",
     "main": "src/index.js",
     "scripts": {
+        "dev": "DEBUG=1 backpack dev",
         "start": "backpack",
         "build": "backpack build && ./prepend-shebang.sh",
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,13 +17,15 @@
     "dependencies": {
         "backpack-core": "^0.4.2",
         "chalk": "^2.1.0",
+        "check-types": "^7.3.0",
         "commander": "^2.11.0",
         "es6-promisify": "^5.0.0",
         "fs-extra": "^4.0.1",
         "globby": "^6.1.0",
         "inquirer": "^3.2.3",
         "node-cmd": "^3.0.0",
-        "replace-in-file": "^2.6.4"
+        "replace-in-file": "^2.6.4",
+        "rx": "^4.1.0"
     },
     "devDependencies": {
         "babel-eslint": "^7.2.3",

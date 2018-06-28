@@ -1,17 +1,12 @@
+/* eslint-disable no-console */
 import chalk from 'chalk';
-import promisify from 'es6-promisify';
-import fs from 'fs';
-import cmd from 'node-cmd';
 import path from 'path';
 import replace from 'replace-in-file';
+import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
+import { errors } from '../globals/snippets';
 import log from '../services/log';
-import run from '../services/run';
-
-const writeFile = promisify(fs.writeFile);
-const get = promisify(cmd.get, {
-    thisArg: cmd,
-    multiArgs: true,
-});
+import { store } from '../store/createStore';
+import BaseQuestion from './BaseQuestion';
 
 export default {
     default: ({ ssr, flow }) => ssr && !flow ? 'standard-react' : 'react-app',
@@ -19,57 +14,71 @@ export default {
     message: chalk`{bold What ESLint config should to be used? Enter the eslint-config-{cyan name}}`,
     validate: async (answer) => {
         const packageName = 'eslint-config-' + answer;
-        const res = await get(`npm s ${packageName} --json`);
+        const res = await PROMISIFIED_METHODS.get(`npm s ${packageName} --json`);
         const results = JSON.parse(res[0]).filter(result => result.name === packageName);
         return results.length ? true : `${packageName} was not found on the npm registry.`;
     },
 };
 
-export const execute = async ({ answer, answers: { ssr, appname, mobile, eslint }, devPackages }) => {
-    if (mobile && !eslint) {
-        return;
-    }
+export class EslintConfigExecute extends BaseQuestion {
+    appname = this.answers.appname;
 
-    if ((answer !== 'react-app' && !mobile) || (mobile && eslint)) {
-        devPackages.push(`eslint-config-${answer}`);
-        const res = await get(`npm info "eslint-config-${answer}@latest" peerDependencies --json`);
-        const peerDeps = JSON.parse(res[0]);
-        devPackages.push(...Object.keys(peerDeps).map(key => `${key}@${peerDeps[key]}`));
-    }
+    [GENERATOR_TYPES.razzle] = async () => {
+        await this.execReactNativeAndRazzle;
+    };
 
-    if (answer !== 'react-app' && !ssr && !mobile) {
-        // eject if we're on create-react-app.
-        log(chalk`You indicated a different config than {dim react-app}. This requires ejecting from {dim create-react-app}, it will prompt you now.`, 'warn');
-        await run('npm run eject', {
-            cwd: path.join(process.cwd(), appname),
+    [GENERATOR_TYPES.createReactApp] = async () => {
+        await this.addEslintConfigToDevDeps();
+        log(errors.ejectCRA, 'warn');
+
+        // update state that we have ejected
+        store.changeState({
+            createReactAppEjected: true,
         });
+
+        await this.commands.push(['npm run eject', { cwd: path.join(process.cwd(), this.appname) }]);
+
         await replace({
-            files: path.join(process.cwd(), appname, 'package.json'),
+            files: path.join(process.cwd(), this.appname, 'package.json'),
             from: /"extends": "react-app"/g,
-            to: `"extends": "${answer}"`,
+            to: `"extends": "${this.answer}"`,
         });
-    }
+    };
 
-    if ((answer !== 'react-app' && ssr) || (mobile && eslint)) {
-        await writeFile(path.join(process.cwd(), appname, '.eslintrc'), `
+    [GENERATOR_TYPES.reactNative] = async () => {
+        await this.execReactNativeAndRazzle;
+    };
+
+    execReactNativeAndRazzle = async () => {
+        await this.addEslintConfigToDevDeps();
+        await this.createEslintRc();
+    };
+
+    onPostInstall = async () => {
+        // attempt auto fix now that config etc is in place.
+        console.log();
+        log('💡  Running ESLint autofix for you..');
+        console.log();
+        try {
+            await this.commands.push(['npx eslint --fix src', { cwd: path.join(process.cwd(), this.appname) }]);
+            log(`✅  No ESLint errors found! :)`);
+        } catch (ex) {
+            log('ESLint auto fix failed! Check log above.', 'warn', ex);
+        }
+    };
+
+    createEslintRc = async () => {
+        await this.writeFile(path.join(process.cwd(), this.appname, '.eslintrc'), `
 {
-    "extends": "${answer}"
+    "extends": "${this.answer}"
 }
 `);
-    }
-};
+    };
 
-export const postInstall = async ({ answers: { appname, eslint, mobile } }) => {
-    if (mobile && !eslint) {
-        return;
-    }
-
-    // attempt auto fix now that config etc is in place.
-    try {
-        await run('npx eslint --fix src', {
-            cwd: path.join(process.cwd(), appname),
-        });
-    } catch (ex) {
-        log('ESLint auto fix failed! Check log above.', 'warn', ex);
-    }
-};
+    addEslintConfigToDevDeps = async () => {
+        this.devPackages.push(`eslint-config-${this.answer}`);
+        const res = await PROMISIFIED_METHODS.get(`npm info "eslint-config-${this.answer}@latest" peerDependencies --json`);
+        const peerDeps = JSON.parse(res[0]);
+        this.devPackages.push(...Object.keys(peerDeps).map(key => `${key}@${peerDeps[key]}`));
+    };
+}

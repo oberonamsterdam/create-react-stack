@@ -1,11 +1,9 @@
-import run from '../services/run';
+/* eslint-disable no-console */
 import path from 'path';
-import inquirer from 'inquirer';
-import chalk from 'chalk';
-import promisify from 'es6-promisify';
-import fs from 'fs';
-
-const rm = promisify(fs.unlink);
+import { GENERATOR_TYPES, PROMISIFIED_METHODS } from '../globals/constants';
+import { flowReactNative } from '../globals/snippets';
+import log from '../services/log';
+import BaseQuestion from './BaseQuestion';
 
 export default {
     type: 'confirm',
@@ -13,38 +11,44 @@ export default {
     message: 'Use flow? (http://flow.org)',
 };
 
-export const execute = async ({ answer, devPackages }) => {
-    if (answer) {
-        devPackages.push('flow-bin');
-    }
-};
+export class FlowExecute extends BaseQuestion {
+    mobile = this.answers.mobile;
+    appname = this.answers.appname;
 
-export const postInstall = async ({ answer, answers: { appname, mobile } }) => {
-    if (!answer) {
-        if (mobile) {
-            // react native includes a .flowconfig by default, so we'll delete it. 
-            // (kind of makes no sense to do so but hey, consistency.)
-            await rm(path.join(process.cwd(), appname, '.flowconfig'));
+    default = async () => {
+        this.devPackages.push('flow-bin');
+    };
+
+    onPostInstall = async () => {
+        if (this.state.generator === GENERATOR_TYPES.reactNative) {
+            const { rm, writeFile } = PROMISIFIED_METHODS;
+            // remove .flowconfig added by expo
+            await rm(path.join(this.dir, '.flowconfig'));
+
+            // add our custom .flowconfig
+            await writeFile(path.join(this.dir, '.flowconfig'), flowReactNative.flowConfig);
+
+            // run flow-typed by default to avoid flow throwing errors on undeclared modules
+            await this.runFlowTyped();
+
+            // add react-native type declaration (and other type declaration if needed).
+            await writeFile(path.join(this.dir, 'flow-typed', 'npm', 'index.js'), flowReactNative.flowTyped);
+        } else {
+            await this.runFlowTyped();
         }
+        await this.runFlow();
+    };
 
-        return;
-    }
+    runFlowTyped = async () => {
+        // automatically type dependencies to avoid flow throwing errors on startup
+        await this.commands.push(['npx flow-typed install', { cwd: path.join(process.cwd(), this.appname) }]);
+    };
 
-    if (!mobile) {
-        await run('npx flow init', {
-            cwd: path.join(process.cwd(), appname),
-        });
-    }
+    runFlow = async () => {
+        console.log();
+        log(`👮  Running flow..`);
+        console.log();
 
-    const { flowTyped } = await inquirer.prompt([{
-        type: 'confirm',
-        name: 'flowTyped',
-        message: chalk`{bold Run {dim flow-typed} now? (will automatically type all your dependencies)}`,
-    }]);
-
-    if (flowTyped) {
-        await run('npx flow-typed install', {
-            cwd: path.join(process.cwd(), appname),
-        });
-    }
-};
+        await this.commands.push([`node ${path.join('.', 'node_modules', '.bin', 'flow')}`, { cwd: this.dir }]);
+    };
+}

@@ -1,5 +1,7 @@
+/* eslint-disable no-useless-constructor */
 import chalk from 'chalk';
 import log from '../services/log';
+import BaseQuestion from './BaseQuestion';
 
 export default {
     type: 'confirm',
@@ -10,15 +12,17 @@ export default {
     when: ({ mobile }) => mobile,
 };
 
-export const execute = async ({ answer, devPackages }) => {
-    if (answer) {
-        devPackages.push('eslint');
-    }
-};
+export class EslintExecute extends BaseQuestion {
 
-export const postInstall = ({answer}) => {
-    if (answer) {
+    default = async () => {
+        this.devPackages.push('eslint');
+        if (this.answers.mobile) {
+            this.devPackages.push('babel-eslint');
+        }
+    };
+
+    onPostInstall () {
         log(chalk`ESLint has been installed, but will still need to be configured in your IDE.`, 'warn');
         log(chalk`Configure it or run {dim npx eslint .} manually to get linter output.`, 'warn');
     }
-};
+}
